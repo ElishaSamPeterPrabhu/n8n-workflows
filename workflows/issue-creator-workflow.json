@@ -105,7 +105,7 @@
         "title": "={{ $json.title }}",
         "body": "={{ $json.body }}",
         "labels": {
-          "labels": "={{ $json.labels.join(',') }}"
+          "labels": "={{ $json.labels.map(l => ({ label: l })) }}"
         },
         "assignees": {
           "assignees": "={{ $json.assignee || '' }}"
