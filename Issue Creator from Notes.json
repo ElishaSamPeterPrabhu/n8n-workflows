@@ -1,0 +1,295 @@
+{
+  "name": "Issue Creator from Notes",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-2496, 384],
+      "id": "40ecd4a7-05e7-40ce-9a88-878335471260",
+      "name": "Start Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "planning-notes-field",
+              "name": "planningNotes",
+              "value": "We need to fix the accessibility issues in the navigation component — keyboard navigation is broken for screen readers. Also, the button component needs a new `size` prop (sm, md, lg) as part of the design system update. The tooltip component should auto-dismiss after 5 seconds. We should add comprehensive unit tests for the form components to improve test coverage. The storybook documentation is outdated and needs to be updated to reflect the latest API changes for input, select, and checkbox components.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-2272, 384],
+      "id": "1d7d1735-3d58-45d7-b9e0-47333476da3d",
+      "name": "Planning Notes Input"
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/ElishaSamPeterPrabhu/modus-wc-2.0/issues",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "state", "value": "open" },
+            { "name": "per_page", "value": "100" },
+            { "name": "page", "value": "1" }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-2048, 384],
+      "id": "d9d704bf-745f-44f2-89f2-372d2d0fdfe6",
+      "name": "Get All Open Issues",
+      "credentials": {
+        "githubApi": {
+          "id": "mHISQCA9z7yFe6Cy",
+          "name": "GitHub account 70"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are checking for duplicate GitHub issues. Be fast and concise.\n\nExisting open issue titles:\n{{ $input.all().filter(i => !i.json.pull_request).map(i => i.json.title).join('\\n') }}\n\nPlanning notes (new issues to be created from this):\n{{ $('Planning Notes Input').first().json.planningNotes }}\n\nFor each topic mentioned in the planning notes, check if a similar issue already exists in the list above. Two issues are duplicates if they are about the same component and the same problem/feature — even if worded differently.\n\nRespond ONLY with a valid JSON object — no markdown, no extra text:\n{\"duplicates\": [\"exact topic or short phrase from planning notes that already exists\"], \"new\": [\"exact topic or short phrase from planning notes that does NOT exist yet\"]}",
+        "options": {
+          "systemMessage": "You are a fast duplicate checker. Output only a JSON object with keys: duplicates (array of topics already covered by existing issues) and new (array of topics that are genuinely new). Be concise, no markdown fences."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [-1824, 384],
+      "id": "extract-titles-node-001",
+      "name": "Check Duplicates"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-2.0-flash",
+          "mode": "list",
+          "cachedResultName": "gemini-2.0-flash"
+        },
+        "options": {}
+      },
+      "type": "CUSTOM.lmChatTrimbleGateway",
+      "typeVersion": 1,
+      "position": [-1752, 608],
+      "id": "cheap-model-node-001",
+      "name": "Trimble Gateway (Fast)",
+      "credentials": {
+        "trimbleModelGatewayOAuth2Api": {
+          "id": "6sC2H2Re3rOpqZn1",
+          "name": "Trimble Identity account 412"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a software engineering manager creating GitHub issues from sprint planning notes for the Modus Web Components repository.\n\nPlanning Notes:\n{{ $('Planning Notes Input').first().json.planningNotes }}\n\nTopics already covered by existing issues (DO NOT create issues for these):\n{{ (() => { try { const raw = $('Check Duplicates').first().json.output || ''; const cleaned = raw.replace(/```json?\\s*/gi,'').replace(/```/g,'').trim(); return JSON.parse(cleaned).duplicates?.join('\\n') || 'none'; } catch(e) { return 'none'; } })() }}\n\nOnly create issues for topics NOT in the duplicates list above.\n\nClassify each issue and assign exactly ONE label:\n- \"bug\" — something broken or not working (triggers PATCH version bump)\n- \"enhancement\" — new feature, new prop, new component, new event (triggers MINOR version bump)\n- \"breaking-change\" — incompatible API change: removed prop, renamed event, changed prop type (triggers MAJOR version bump)\n- \"chore\" — internal task: docs, testing, refactor, skip-changelog items\n\nFor BUG issues use this body template:\n### Prerequisites\n- [x] I have searched for duplicate or closed issues\n- [x] I have read the contributing guidelines\n\n### Describe the issue\n<clear description of the bug and expected behaviour>\n\n### Reduced test cases\n<steps to reproduce or N/A>\n\n### What operating system(s) are you seeing the problem on?\nN/A\n\n### What browser(s) are you seeing the problem on?\nN/A\n\n### What is the issue regarding?\n@trimble-oss/modus-wc\n\n### Priority\n<High / Medium / Low>\n\n### What product/project are you using Modus Web Components for?\nModus\n\n### What is your team/division name?\nModus\n\n### Are you willing to contribute?\nNone\n\n### Are you using Modus Web Components in production?\n_No response_\n\nFor FEATURE/ENHANCEMENT issues use this body template:\n### Prerequisites\n- [x] I have searched for duplicate or closed feature requests\n- [x] I have read the Modus style guidelines\n\n### Proposal\n<detailed description of the feature>\n\n### Motivation and context\n<why this is needed>\n\n### What is the issue regarding?\n@trimble-oss/modus-wc\n\n### Priority\n<High / Medium / Low>\n\n### What product/project are you using Modus Components for?\nModus\n\n### What is your team/division name?\nModus\n\n### Are you willing to contribute?\nNone\n\n### Are you using Modus Web Components in production?\n_No response_\n\nFor CHORE/BREAKING-CHANGE issues use this body template:\n### Summary\n<what needs to be done>\n\n### Context\n<why it matters>\n\n### Acceptance Criteria\n- <bullet list of what done looks like>\n\n### Priority\n<High / Medium / Low>\n\nRespond ONLY with a valid JSON array. No markdown fences, no extra text:\n[\n  {\n    \"title\": \"concise imperative title\",\n    \"body\": \"full markdown body following the correct template above\",\n    \"label\": \"bug|enhancement|breaking-change|chore\",\n    \"assignee\": null\n  }\n]",
+        "options": {
+          "systemMessage": "You are an issue creation assistant for the Modus Web Components repo. Output only a valid JSON array, no markdown fences, no extra text. Each issue must have exactly one label: bug, enhancement, breaking-change, or chore."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [-1472, 384],
+      "id": "363ec4df-e3d7-4724-bcf8-9d8ff42a96c7",
+      "name": "AI: Parse Notes into Issues"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-3-pro-preview",
+          "mode": "list",
+          "cachedResultName": "gemini-3-pro-preview"
+        },
+        "options": {}
+      },
+      "type": "CUSTOM.lmChatTrimbleGateway",
+      "typeVersion": 1,
+      "position": [-1400, 608],
+      "id": "c448ca12-391b-40b1-82ea-ca36f83c8836",
+      "name": "Trimble Gateway (Issue Parser)",
+      "credentials": {
+        "trimbleModelGatewayOAuth2Api": {
+          "id": "6sC2H2Re3rOpqZn1",
+          "name": "Trimble Identity account 412"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst raw = item.json.output || item.json.text || item.json.message || '';\n\nlet issues = [];\ntry {\n  const cleaned = raw.replace(/```json?\\s*/g, '').replace(/```\\s*/g, '').trim();\n  const parsed = JSON.parse(cleaned);\n  if (Array.isArray(parsed)) {\n    issues = parsed;\n  } else if (parsed.issues && Array.isArray(parsed.issues)) {\n    issues = parsed.issues;\n  } else {\n    throw new Error('Expected an array');\n  }\n} catch (e) {\n  throw new Error(`Failed to parse AI output: ${e.message}\\n\\nRaw: ${raw.substring(0, 500)}`);\n}\n\n// Get the existing titles fetched earlier\nconst existingTitles = $('Extract Existing Titles').first().json.existingTitles || [];\n\nconst validated = issues.map((issue, i) => {\n  if (!issue.title || typeof issue.title !== 'string') {\n    throw new Error(`Issue at index ${i} is missing a valid title`);\n  }\n  let label = issue.label || issue.labels || 'chore';\n  if (Array.isArray(label)) label = label[0] || 'chore';\n  label = String(label).trim();\n\n  // Duplicate check — normalize and compare titles\n  const normalize = t => t.toLowerCase().replace(/[^a-z0-9\\s]/g, '').replace(/\\s+/g, ' ').trim();\n  const newTitle = normalize(issue.title);\n  const isDuplicate = existingTitles.some(existing => {\n    const existingNorm = normalize(existing);\n    // Exact match or one contains the other (catches minor wording differences)\n    return existingNorm === newTitle ||\n      existingNorm.includes(newTitle) ||\n      newTitle.includes(existingNorm);\n  });\n\n  return {\n    title: issue.title.trim(),\n    body: issue.body || '',\n    label,\n    assignee: issue.assignee || null,\n    isDuplicate,\n    duplicateReason: isDuplicate ? `Similar to existing: \"${existingTitles.find(e => normalize(e).includes(newTitle) || newTitle.includes(normalize(e)))}\"` : null\n  };\n});\n\nreturn validated.map(issue => ({ json: issue }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1120, 384],
+      "id": "d2165a1a-9eeb-4489-9c80-40083b649e25",
+      "name": "Extract & Validate Issues"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [-896, 384],
+      "id": "057b2ff4-080d-4aaa-a8ba-36decc39f63b",
+      "name": "Loop Over Issues"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "not-duplicate-check",
+              "leftValue": "={{ $json.isDuplicate }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEqual"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-672, 384],
+      "id": "if-not-duplicate-001",
+      "name": "Is Duplicate?"
+    },
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "value": "ElishaSamPeterPrabhu",
+          "mode": "list",
+          "cachedResultName": "ElishaSamPeterPrabhu",
+          "cachedResultUrl": "https://github.com/ElishaSamPeterPrabhu"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "modus-wc-2.0",
+          "mode": "list",
+          "cachedResultName": "modus-wc-2.0",
+          "cachedResultUrl": "https://github.com/ElishaSamPeterPrabhu/modus-wc-2.0"
+        },
+        "title": "={{ $json.title }}",
+        "body": "={{ $json.body }}",
+        "labels": [
+          {
+            "label": "={{ $json.label }}"
+          }
+        ],
+        "assignees": [
+          {
+            "assignee": "={{ $json.assignee || '' }}"
+          }
+        ]
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [-448, 288],
+      "id": "da29651f-b332-4de8-bfb6-41619d9b3894",
+      "name": "Create an issue",
+      "webhookId": "022bfabe-d230-49ce-a5cf-727651027b5e",
+      "credentials": {
+        "githubApi": {
+          "id": "mHISQCA9z7yFe6Cy",
+          "name": "GitHub account 70"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collect results from both branches after loop completes\nconst items = $input.all();\nconst created = [];\nconst skipped = [];\n\nfor (const item of items) {\n  if (item.json.html_url) {\n    // Successfully created\n    created.push({ number: item.json.number, title: item.json.title, url: item.json.html_url });\n  } else if (item.json.isDuplicate) {\n    // Skipped as duplicate\n    skipped.push({ title: item.json.title, reason: item.json.duplicateReason });\n  }\n}\n\nconsole.log(`Created: ${created.length}, Skipped (duplicates): ${skipped.length}`);\nreturn [{ json: { created, skipped, createdCount: created.length, skippedCount: skipped.length } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-224, 384],
+      "id": "356d9dd2-4323-4da5-bacc-e35c402bf4c5",
+      "name": "Summary"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start Workflow": {
+      "main": [[{ "node": "Planning Notes Input", "type": "main", "index": 0 }]]
+    },
+    "Planning Notes Input": {
+      "main": [[{ "node": "Get All Open Issues", "type": "main", "index": 0 }]]
+    },
+    "Get All Open Issues": {
+      "main": [[{ "node": "Check Duplicates", "type": "main", "index": 0 }]]
+    },
+    "Trimble Gateway (Fast)": {
+      "ai_languageModel": [[{ "node": "Check Duplicates", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Check Duplicates": {
+      "main": [[{ "node": "AI: Parse Notes into Issues", "type": "main", "index": 0 }]]
+    },
+    "Trimble Gateway (Issue Parser)": {
+      "ai_languageModel": [[{ "node": "AI: Parse Notes into Issues", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "AI: Parse Notes into Issues": {
+      "main": [[{ "node": "Extract & Validate Issues", "type": "main", "index": 0 }]]
+    },
+    "Extract & Validate Issues": {
+      "main": [[{ "node": "Loop Over Issues", "type": "main", "index": 0 }]]
+    },
+    "Loop Over Issues": {
+      "main": [
+        [{ "node": "Summary", "type": "main", "index": 0 }],
+        [{ "node": "Create an issue", "type": "main", "index": 0 }]
+      ]
+    },
+    "Create an issue": {
+      "main": [[{ "node": "Loop Over Issues", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1e3d1854-3085-4c26-ab4e-f70dbacc1d9d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9864951ea4472b9d0ea716c66bb2527efb446aa6309ab9f74077ab1db432402b"
+  },
+  "id": "pKrKwFnu0T1a7jWu",
+  "tags": [
+    {
+      "updatedAt": "2026-03-09T11:08:08.285Z",
+      "createdAt": "2026-03-09T11:08:08.285Z",
+      "id": "b5wmLFj8YNO1bWDt",
+      "name": "Github"
+    }
+  ]
+}
