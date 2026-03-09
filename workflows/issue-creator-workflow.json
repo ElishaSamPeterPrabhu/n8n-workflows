@@ -32,9 +32,9 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are a software engineering manager creating GitHub issues from sprint planning notes for the Modus Web Components repository.\n\nPlanning Notes:\n{{ $json.planningNotes }}\n\nExtract every distinct, actionable task and create a GitHub issue for each one.\n\nFirst, classify each issue as one of:\n- \"bug\" — something is broken or not working as expected\n- \"feature\" — a new feature or enhancement request\n- \"task\" — a general task (docs, testing, refactor, etc.)\n\nThen produce the body in the correct format for its type:\n\nFor BUG issues, the body must follow this exact markdown structure:\n### Prerequisites\n- [x] I have searched for duplicate or closed issues\n- [x] I have read the contributing guidelines\n\n### Describe the issue\n<clear description of the bug and expected behaviour>\n\n### Reduced test cases\n<steps to reproduce or N/A>\n\n### What operating system(s) are you seeing the problem on?\n<e.g. macOS, Windows or N/A>\n\n### What browser(s) are you seeing the problem on?\n<e.g. Chrome, Safari or N/A>\n\n### What is the issue regarding?\n@trimble-oss/modus-wc\n\n### Priority\n<High / Medium / Low>\n\n### What product/project are you using Modus Web Components for?\nModus\n\n### What is your team/division name?\nModus\n\n### Are you willing to contribute?\nNone\n\n### Are you using Modus Web Components in production?\n_No response_\n\nFor FEATURE issues, the body must follow this exact markdown structure:\n### Prerequisites\n- [x] I have searched for duplicate or closed feature requests\n- [x] I have read the Modus style guidelines\n\n### Proposal\n<detailed description of the feature>\n\n### Motivation and context\n<why this is needed>\n\n### What is the issue regarding?\n@trimble-oss/modus-wc\n\n### Priority\n<High / Medium / Low>\n\n### What product/project are you using Modus Components for?\nModus\n\n### What is your team/division name?\nModus\n\n### Are you willing to contribute?\nNone\n\n### Are you using Modus Web Components in production?\n_No response_\n\nFor TASK issues, use this structure:\n### Summary\n<what needs to be done>\n\n### Context\n<why it matters>\n\n### Acceptance Criteria\n- <bullet list of what done looks like>\n\n### Priority\n<High / Medium / Low>\n\nFor labels, use these based on type:\n- bug / bugfix → [\"bug\"] — triggers PATCH bump\n- feature / new functionality → [\"enhancement\"] — triggers MINOR bump\n- new component or new event → [\"new-feature\"] — triggers MINOR bump\n- breaking change (removed prop, renamed event, changed prop type) → [\"breaking-change\"] — triggers MAJOR bump\n- docs task → [\"documentation\", \"skip-changelog\"]\n- testing task → [\"testing\", \"skip-changelog\"]\n- refactor / internal task → [\"refactor\", \"skip-changelog\"]\n- accessibility fix → [\"bug\", \"accessibility\"]\n- design system change → [\"enhancement\", \"design-system\"]\n\nRespond ONLY with a valid JSON array. No markdown fences, no extra text:\n[\n  {\n    \"type\": \"bug|feature|task\",\n    \"title\": \"concise imperative title\",\n    \"body\": \"full markdown body following the correct template\",\n    \"labels\": [\"label1\"],\n    \"assignee\": null\n  }\n]",
+        "text": "=You are a software engineering manager creating GitHub issues from sprint planning notes for the Modus Web Components repository.\n\nPlanning Notes:\n{{ $json.planningNotes }}\n\nExtract every distinct, actionable task and create a GitHub issue for each one.\n\nClassify each issue and assign exactly ONE label:\n- \"bug\" — something broken or not working (triggers PATCH version bump)\n- \"enhancement\" — new feature, new prop, new component, new event (triggers MINOR version bump)\n- \"breaking-change\" — incompatible API change: removed prop, renamed event, changed prop type (triggers MAJOR version bump)\n- \"chore\" — internal task: docs, testing, refactor, skip-changelog items\n\nProduce the body using the correct template for the issue type:\n\nFor BUG issues:\n### Prerequisites\n- [x] I have searched for duplicate or closed issues\n- [x] I have read the contributing guidelines\n\n### Describe the issue\n<clear description of the bug and expected behaviour>\n\n### Reduced test cases\n<steps to reproduce or N/A>\n\n### What operating system(s) are you seeing the problem on?\nN/A\n\n### What browser(s) are you seeing the problem on?\nN/A\n\n### What is the issue regarding?\n@trimble-oss/modus-wc\n\n### Priority\n<High / Medium / Low>\n\n### What product/project are you using Modus Web Components for?\nModus\n\n### What is your team/division name?\nModus\n\n### Are you willing to contribute?\nNone\n\n### Are you using Modus Web Components in production?\n_No response_\n\nFor FEATURE/ENHANCEMENT issues:\n### Prerequisites\n- [x] I have searched for duplicate or closed feature requests\n- [x] I have read the Modus style guidelines\n\n### Proposal\n<detailed description of the feature>\n\n### Motivation and context\n<why this is needed>\n\n### What is the issue regarding?\n@trimble-oss/modus-wc\n\n### Priority\n<High / Medium / Low>\n\n### What product/project are you using Modus Components for?\nModus\n\n### What is your team/division name?\nModus\n\n### Are you willing to contribute?\nNone\n\n### Are you using Modus Web Components in production?\n_No response_\n\nFor CHORE/BREAKING-CHANGE issues:\n### Summary\n<what needs to be done>\n\n### Context\n<why it matters>\n\n### Acceptance Criteria\n- <bullet list of what done looks like>\n\n### Priority\n<High / Medium / Low>\n\nRespond ONLY with a valid JSON array. No markdown fences, no extra text:\n[\n  {\n    \"title\": \"concise imperative title\",\n    \"body\": \"full markdown body following the correct template above\",\n    \"label\": \"bug|enhancement|breaking-change|chore\",\n    \"assignee\": null\n  }\n]",
         "options": {
-          "systemMessage": "You are an issue creation assistant for the Modus Web Components repo. Classify each issue as bug, feature, or task and produce the body using the correct GitHub issue template structure. Output only a valid JSON array, no markdown fences, no extra text."
+          "systemMessage": "You are an issue creation assistant for the Modus Web Components repo. Output only a valid JSON array, no markdown fences, no extra text. Each issue must have exactly one label: bug, enhancement, breaking-change, or chore."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -67,7 +67,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first();\nconst raw = item.json.output || item.json.text || item.json.message || '';\n\nlet issues = [];\n\ntry {\n  const cleaned = raw\n    .replace(/```json?\\s*/g, '')\n    .replace(/```\\s*/g, '')\n    .trim();\n  \n  const parsed = JSON.parse(cleaned);\n  \n  if (Array.isArray(parsed)) {\n    issues = parsed;\n  } else if (parsed.issues && Array.isArray(parsed.issues)) {\n    issues = parsed.issues;\n  } else {\n    throw new Error('Unexpected JSON structure — expected an array');\n  }\n} catch (e) {\n  throw new Error(`Failed to parse AI output into issues: ${e.message}\\n\\nRaw output: ${raw.substring(0, 500)}`);\n}\n\nconst validated = issues.map((issue, i) => {\n  if (!issue.title || typeof issue.title !== 'string') {\n    throw new Error(`Issue at index ${i} is missing a valid title`);\n  }\n  // Normalise labels — handle string, comma-separated string, or array\n  let labels = issue.labels || [];\n  if (typeof labels === 'string') {\n    labels = labels.split(',').map(l => l.trim()).filter(Boolean);\n  }\n  return {\n    title: issue.title.trim(),\n    body: issue.body || '',\n    labels,\n    assignee: issue.assignee || null\n  };\n});\n\nreturn validated.map(issue => ({ json: issue }));"
+        "jsCode": "const item = $input.first();\nconst raw = item.json.output || item.json.text || item.json.message || '';\n\nlet issues = [];\n\ntry {\n  const cleaned = raw\n    .replace(/```json?\\s*/g, '')\n    .replace(/```\\s*/g, '')\n    .trim();\n  const parsed = JSON.parse(cleaned);\n  if (Array.isArray(parsed)) {\n    issues = parsed;\n  } else if (parsed.issues && Array.isArray(parsed.issues)) {\n    issues = parsed.issues;\n  } else {\n    throw new Error('Expected an array');\n  }\n} catch (e) {\n  throw new Error(`Failed to parse AI output: ${e.message}\\n\\nRaw: ${raw.substring(0, 500)}`);\n}\n\nconst validated = issues.map((issue, i) => {\n  if (!issue.title || typeof issue.title !== 'string') {\n    throw new Error(`Issue at index ${i} is missing a valid title`);\n  }\n  // Ensure label is a single string\n  let label = issue.label || issue.labels || 'chore';\n  if (Array.isArray(label)) label = label[0] || 'chore';\n  label = String(label).trim();\n  return {\n    title: issue.title.trim(),\n    body: issue.body || '',\n    label,\n    assignee: issue.assignee || null\n  };\n});\n\nreturn validated.map(issue => ({ json: issue }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -87,29 +87,36 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "=https://api.github.com/repos/ElishaSamPeterPrabhu/modus-wc-2.0/issues",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Accept", "value": "application/vnd.github+json" },
-            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+        "resource": "issue",
+        "operation": "create",
+        "owner": {
+          "__rl": true,
+          "value": "ElishaSamPeterPrabhu",
+          "mode": "list",
+          "cachedResultName": "ElishaSamPeterPrabhu"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "modus-wc-2.0",
+          "mode": "list",
+          "cachedResultName": "modus-wc-2.0",
+          "cachedResultUrl": "https://github.com/ElishaSamPeterPrabhu/modus-wc-2.0"
+        },
+        "title": "={{ $json.title }}",
+        "body": "={{ $json.body }}",
+        "labels": {
+          "labels": [
+            {
+              "label": "={{ $json.label }}"
+            }
           ]
         },
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "title": "={{ $json.title }}",
-          "body": "={{ $json.body }}",
-          "labels": "={{ $json.labels }}",
-          "assignees": "={{ $json.assignee ? [$json.assignee] : [] }}"
-        },
-        "options": {}
+        "assignees": {
+          "assignees": "={{ $json.assignee ? [{ assignee: $json.assignee }] : [] }}"
+        }
       },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
       "position": [600, 200],
       "id": "b2c3d4e5-0007-4000-8000-000000000007",
       "name": "Create GitHub Issue",
@@ -122,7 +129,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// After all issues are created, produce a summary\n// This node runs after the loop completes (connected to loop's 'done' output)\nconst items = $input.all();\n\nconst created = items.map(item => ({\n  number: item.json.number,\n  title: item.json.title,\n  url: item.json.html_url,\n  state: item.json.state\n}));\n\nconsole.log(`Created ${created.length} GitHub issues.`);\n\nreturn [{ json: { createdIssues: created, count: created.length } }];"
+        "jsCode": "const items = $input.all();\nconst created = items.map(item => ({\n  number: item.json.number,\n  title: item.json.title,\n  url: item.json.html_url,\n  state: item.json.state\n}));\nconsole.log(`Created ${created.length} GitHub issues.`);\nreturn [{ json: { createdIssues: created, count: created.length } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -134,88 +141,28 @@
   "pinData": {},
   "connections": {
     "Start Workflow": {
-      "main": [
-        [
-          {
-            "node": "Planning Notes Input",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Planning Notes Input", "type": "main", "index": 0 }]]
     },
     "Planning Notes Input": {
-      "main": [
-        [
-          {
-            "node": "AI: Parse Notes into Issues",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "AI: Parse Notes into Issues", "type": "main", "index": 0 }]]
     },
     "AI: Parse Notes into Issues": {
-      "main": [
-        [
-          {
-            "node": "Extract & Validate Issues",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Extract & Validate Issues", "type": "main", "index": 0 }]]
     },
     "Trimble Gateway (Issue Parser)": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI: Parse Notes into Issues",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
+      "ai_languageModel": [[{ "node": "AI: Parse Notes into Issues", "type": "ai_languageModel", "index": 0 }]]
     },
     "Extract & Validate Issues": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Issues",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Loop Over Issues", "type": "main", "index": 0 }]]
     },
     "Loop Over Issues": {
       "main": [
-        [
-          {
-            "node": "Summary",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create GitHub Issue",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Summary", "type": "main", "index": 0 }],
+        [{ "node": "Create GitHub Issue", "type": "main", "index": 0 }]
       ]
     },
     "Create GitHub Issue": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Issues",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Loop Over Issues", "type": "main", "index": 0 }]]
     }
   },
   "active": false,
