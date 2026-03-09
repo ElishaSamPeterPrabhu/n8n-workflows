@@ -99,8 +99,13 @@
           ]
         },
         "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ title: $json.title, body: $json.body, labels: $json.labels, assignees: $json.assignee ? [$json.assignee] : [] }) }}",
+        "contentType": "json",
+        "body": {
+          "title": "={{ $json.title }}",
+          "body": "={{ $json.body }}",
+          "labels": "={{ $json.labels }}",
+          "assignees": "={{ $json.assignee ? [$json.assignee] : [] }}"
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
