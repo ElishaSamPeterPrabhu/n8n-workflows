@@ -40,31 +40,6 @@
       "type": "CUSTOM.lmChatTrimbleGateway",
       "typeVersion": 1,
       "position": [
-        3688,
-        2400
-      ],
-      "id": "0af0f865-d829-4183-94f3-2037dee6f3a7",
-      "name": "Trimble Gateway (Priority)1",
-      "credentials": {
-        "trimbleModelGatewayOAuth2Api": {
-          "id": "6sC2H2Re3rOpqZn1",
-          "name": "Trimble Identity account 412"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "gemini-3-pro-preview",
-          "mode": "list",
-          "cachedResultName": "gemini-3-pro-preview"
-        },
-        "options": {}
-      },
-      "type": "CUSTOM.lmChatTrimbleGateway",
-      "typeVersion": 1,
-      "position": [
         4488,
         2504
       ],
@@ -216,14 +191,20 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.priorityNotes }}",
-        "options": {
-          "systemMessage": "Pass through the input text unchanged as your output."
-        }
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-002",
+              "name": "priorityNotes",
+              "value": "={{ $json.priorityNotes }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
         3616,
         2176
@@ -398,17 +379,6 @@
           {
             "node": "Get All Open Issues1",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Trimble Gateway (Priority)1": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Parse Priorities",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
