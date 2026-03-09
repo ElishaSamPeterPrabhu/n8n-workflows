@@ -64,8 +64,18 @@
     },
     {
       "parameters": {
+        "jsCode": "// Collapse all issue items into one single string — one item in, one item out\nconst titles = $input.all()\n  .filter(i => !i.json.pull_request)\n  .map(i => i.json.title)\n  .filter(Boolean)\n  .join('\\n');\n\nreturn [{ json: { existingTitles: titles, planningNotes: $('Planning Notes Input').first().json.planningNotes } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1936, 384],
+      "id": "collapse-titles-node-001",
+      "name": "Collapse Titles"
+    },
+    {
+      "parameters": {
         "promptType": "define",
-        "text": "=You are checking for duplicate GitHub issues. Be fast and concise.\n\nExisting open issue titles:\n{{ $input.all().filter(i => !i.json.pull_request).map(i => i.json.title).join('\\n') }}\n\nPlanning notes (new issues to be created from this):\n{{ $('Planning Notes Input').first().json.planningNotes }}\n\nFor each topic mentioned in the planning notes, check if a similar issue already exists in the list above. Two issues are duplicates if they are about the same component and the same problem/feature — even if worded differently.\n\nRespond ONLY with a valid JSON object — no markdown, no extra text:\n{\"duplicates\": [\"exact topic or short phrase from planning notes that already exists\"], \"new\": [\"exact topic or short phrase from planning notes that does NOT exist yet\"]}",
+        "text": "=You are checking for duplicate GitHub issues. Be fast and concise.\n\nExisting open issue titles:\n{{ $json.existingTitles }}\n\nPlanning notes (new issues to be created from this):\n{{ $json.planningNotes }}\n\nFor each topic mentioned in the planning notes, check if a similar issue already exists in the list above. Two issues are duplicates if they are about the same component and the same problem/feature — even if worded differently.\n\nRespond ONLY with a valid JSON object — no markdown, no extra text:\n{\"duplicates\": [\"exact topic or short phrase from planning notes that already exists\"], \"new\": [\"exact topic or short phrase from planning notes that does NOT exist yet\"]}",
         "options": {
           "systemMessage": "You are a fast duplicate checker. Output only a JSON object with keys: duplicates (array of topics already covered by existing issues) and new (array of topics that are genuinely new). Be concise, no markdown fences."
         }
@@ -245,6 +255,9 @@
       "main": [[{ "node": "Get All Open Issues", "type": "main", "index": 0 }]]
     },
     "Get All Open Issues": {
+      "main": [[{ "node": "Collapse Titles", "type": "main", "index": 0 }]]
+    },
+    "Collapse Titles": {
       "main": [[{ "node": "Check Duplicates", "type": "main", "index": 0 }]]
     },
     "Trimble Gateway (Fast)": {
