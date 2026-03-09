@@ -6,8 +6,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        2736,
-        2616
+        5840,
+        2144
       ],
       "id": "b11b1034-baf8-4bae-b09c-7c4cb11f4480",
       "name": "When clicking ‘Execute workflow’"
@@ -21,11 +21,11 @@
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
-        5008,
-        2616
+        8688,
+        2000
       ],
-      "id": "471b524f-ed02-4a24-89ba-d9eaf08d57d2",
-      "name": "Markdown1"
+      "id": "42cd4bce-3f3e-4396-a2a8-235f2528af52",
+      "name": "Markdown"
     },
     {
       "parameters": {
@@ -40,36 +40,11 @@
       "type": "CUSTOM.lmChatTrimbleGateway",
       "typeVersion": 1,
       "position": [
-        3704,
-        2736
+        8192,
+        2224
       ],
-      "id": "0af0f865-d829-4183-94f3-2037dee6f3a7",
-      "name": "Trimble Gateway (Priority)1",
-      "credentials": {
-        "trimbleModelGatewayOAuth2Api": {
-          "id": "6sC2H2Re3rOpqZn1",
-          "name": "Trimble Identity account 412"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "gemini-3-pro-preview",
-          "mode": "list",
-          "cachedResultName": "gemini-3-pro-preview"
-        },
-        "options": {}
-      },
-      "type": "CUSTOM.lmChatTrimbleGateway",
-      "typeVersion": 1,
-      "position": [
-        4504,
-        2840
-      ],
-      "id": "40a22949-953e-4caa-8509-f7845e523acc",
-      "name": "Trimble Gateway (Planner)1",
+      "id": "8806765a-76b9-430d-aad4-f70af0d0fde5",
+      "name": "Trimble Gateway (Planner)",
       "credentials": {
         "trimbleModelGatewayOAuth2Api": {
           "id": "6sC2H2Re3rOpqZn1",
@@ -84,11 +59,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4784,
-        2616
+        8464,
+        2000
       ],
-      "id": "82e7c9d8-99a6-4df3-98fb-0ab1be3c76c8",
-      "name": "Format Sprint Plan1"
+      "id": "0e187d50-01b5-4a9c-8321-ffdc841c7d12",
+      "name": "Format Sprint Plan"
     },
     {
       "parameters": {
@@ -104,7 +79,7 @@
             },
             {
               "name": "per_page",
-              "value": "100"
+              "value": "5"
             },
             {
               "name": "page",
@@ -124,10 +99,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2960,
-        2116
+        6064,
+        1712
       ],
-      "id": "000ef5e2-1ca3-441d-bf0d-93330fc11ccf",
+      "id": "2759763f-2811-4a0f-8566-c263ed964b57",
       "name": "Get All Open Issues",
       "credentials": {
         "githubApi": {
@@ -135,68 +110,6 @@
           "name": "GitHub account 70"
         }
       }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": false,
-            "leftValue": "",
-            "typeValidation": "loose"
-          },
-          "conditions": [
-            {
-              "id": "cond-001",
-              "leftValue": "={{ $json.labels.map(l => l.name).join(',').toLowerCase() }}",
-              "rightValue": "in progress",
-              "operator": {
-                "type": "string",
-                "operation": "notContains"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        3184,
-        2116
-      ],
-      "id": "e959ba28-c41a-4b08-a6b3-734a2434c17b",
-      "name": "Exclude In-Progress"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        3408,
-        2116
-      ],
-      "id": "b9e92442-3334-4500-a802-2fa6679569ea",
-      "name": "Loop Over Issues"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=You are a senior software engineer doing sprint planning.\n\nEstimate the following GitHub issue using Fibonacci story points: 1, 2, 3, 5, 8, or 13. Consider complexity, unknowns, and scope.\n\nIssue #{{ $json.number }}: {{ $json.title }}\nLabels: {{ $json.labels.map(l => l.name).join(', ') || 'none' }}\nBody: {{ ($json.body || 'No description').substring(0, 500) }}\n\nRespond ONLY with a valid JSON object — no markdown, no extra text:\n{\"number\": {{ $json.number }}, \"title\": \"{{ $json.title.replace(/\"/g, \"'\") }}\", \"labels\": {{ JSON.stringify($json.labels.map(l => l.name)) }}, \"estimate\": 3, \"rationale\": \"one sentence\"}",
-        "options": {
-          "systemMessage": "You are a sprint estimation assistant. Output only a single valid JSON object with keys: number, title, labels, estimate (Fibonacci integer), rationale. No markdown fences, no extra text."
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        3632,
-        2112
-      ],
-      "id": "8af9d8d0-fada-4249-bc04-55719aa19292",
-      "name": "Estimate Issue"
     },
     {
       "parameters": {
@@ -211,10 +124,163 @@
       "type": "CUSTOM.lmChatTrimbleGateway",
       "typeVersion": 1,
       "position": [
-        3704,
-        2336
+        7392,
+        2080
       ],
-      "id": "a4b0659e-b262-48be-b677-dd75e5a072d9",
+      "id": "0c5445e0-de37-49b4-88e9-a4767f3346d1",
+      "name": "Trimble Gateway (Priority)",
+      "credentials": {
+        "trimbleModelGatewayOAuth2Api": {
+          "id": "6sC2H2Re3rOpqZn1",
+          "name": "Trimble Identity account 412"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "01c598f5-efb7-4adf-96c1-f0d39c3d0df4",
+              "leftValue": "={{ $json.labels.map(l => l.name).join(',').toLowerCase() }}",
+              "rightValue": "untriaged",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        6288,
+        1696
+      ],
+      "id": "09904b16-d75b-4c2c-a831-898be8339e41",
+      "name": "Exclude In-Progress"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        6512,
+        1712
+      ],
+      "id": "3530792f-f542-4215-809c-16a545e24cbf",
+      "name": "Loop Over Issues"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Receives all items from the loop's 'done' output.\n// Each item has $json.output from the AI agent (one per issue).\nconst items = $input.all();\nconst estimates = [];\n\nfor (const item of items) {\n  const raw = item.json.output || '';\n  try {\n    const cleaned = raw.replace(/```json?\\s*/gi, '').replace(/```/g, '').trim();\n    const parsed = JSON.parse(cleaned);\n    estimates.push({\n      number: parsed.number,\n      title: parsed.title,\n      labels: parsed.labels || [],\n      estimate: parsed.estimate,\n      rationale: parsed.rationale\n    });\n  } catch (e) {\n    estimates.push({\n      number: item.json.number || null,\n      title: item.json.title || 'Unknown',\n      labels: [],\n      estimate: null,\n      rationale: 'Parse failed: ' + raw.substring(0, 80)\n    });\n  }\n}\n\nreturn [{ json: { estimates } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6800,
+        1552
+      ],
+      "id": "0378381d-493a-46af-abe4-040003acb299",
+      "name": "Aggregate Estimates"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        7088,
+        1856
+      ],
+      "id": "17305cdb-4595-413b-8987-9e6278b12ee5",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use the priority notes from the meeting and match them with the available issues to determine their priority.\nIssues: {{ JSON.stringify($('Merge').all().map(i => ({ number: i.json.number, title: i.json.title, proposal: (i.json.body || '').match(/### Proposal\\s*\\n+([\\s\\S]*?)(?=###|$)/)?.[1]?.trim().substring(0, 400) || '', comments: i.json.comments })), null, 2) }}\n\n\nPriority Notes: {{ $('Priority Notes Input').first().json.priorityNotes }}\n",
+        "options": {
+          "systemMessage": "You are a sprint planning assistant. Output only a single valid JSON object with keys: high, medium, low — each an array of strings. No markdown fences."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        7312,
+        1856
+      ],
+      "id": "cac605f0-d137-481b-81ac-b6d487d07130",
+      "name": "Parse Priorities"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        7664,
+        2000
+      ],
+      "id": "10113fe7-196b-4f3e-9062-831714ec334e",
+      "name": "Merge All Inputs"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $('Parse Priorities').first().json.output || '';\nlet priorities = { high: [], medium: [], low: [] };\ntry {\n  const cleaned = raw.replace(/```json?\\s*/gi, '').replace(/```/g, '').trim();\n  const parsed = JSON.parse(cleaned);\n  if (parsed.high !== undefined) priorities = parsed;\n} catch(e) {}\n\nconst estimates = $('Aggregate Estimates').first().json.estimates || [];\nconst teamSkills = $('Extract from File').first().json.data || { team: [] };\n\nreturn [{ json: { estimates, priorities, teamSkills } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7888,
+        2000
+      ],
+      "id": "360a7573-500d-4218-a492-cb49da2ea84c",
+      "name": "Prepare Planner Context"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an engineering manager creating a sprint plan.\n\n## Estimated Issues\n{{ JSON.stringify($json.estimates, null, 2) }}\n\n## Priority Rankings\n{{ JSON.stringify($json.priorities, null, 2) }}\n\n## Team Skills (1-5 per skill, speed 1-5, availability: full/partial/limited)\n{{ JSON.stringify($json.teamSkills, null, 2) }}\n\nCreate a sprint plan:\n- Assign each issue to the best team member (skill match + speed + availability)\n- Capacity: full=13pts, partial=8pts, limited=5pts\n- Prioritize high items first, defer what doesn't fit\n\nOutput structured Markdown with:\n## Sprint Goal\n## Assignments\n| Member | Issue # | Title | Estimate | Rationale |\n## Points Summary\n| Member | Assigned | Capacity | Status |\n## Deferred Issues\n| Issue # | Title | Estimate | Reason |\n## Sprint Notes",
+        "options": {
+          "systemMessage": "You are a sprint planning assistant. Output clean Markdown only. No JSON, no code fences around the Markdown."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        8112,
+        2000
+      ],
+      "id": "7f441e33-6da2-4b79-9afa-b9144fbe55a1",
+      "name": "Sprint Planner Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-3-pro-preview",
+          "mode": "list",
+          "cachedResultName": "gemini-3-pro-preview"
+        },
+        "options": {}
+      },
+      "type": "CUSTOM.lmChatTrimbleGateway",
+      "typeVersion": 1,
+      "position": [
+        6816,
+        1968
+      ],
+      "id": "fa84f764-8b29-4229-9a8d-674525c2c75a",
       "name": "Trimble Gateway (Estimator)",
       "credentials": {
         "trimbleModelGatewayOAuth2Api": {
@@ -225,16 +291,20 @@
     },
     {
       "parameters": {
-        "jsCode": "// Receives all items from the loop's 'done' output.\n// Each item has $json.output from the AI agent (one per issue).\nconst items = $input.all();\nconst estimates = [];\n\nfor (const item of items) {\n  const raw = item.json.output || '';\n  try {\n    const cleaned = raw.replace(/```json?\\s*/gi, '').replace(/```/g, '').trim();\n    const parsed = JSON.parse(cleaned);\n    estimates.push({\n      number: parsed.number,\n      title: parsed.title,\n      labels: parsed.labels || [],\n      estimate: parsed.estimate,\n      rationale: parsed.rationale\n    });\n  } catch (e) {\n    estimates.push({\n      number: item.json.number || null,\n      title: item.json.title || 'Unknown',\n      labels: [],\n      estimate: null,\n      rationale: 'Parse failed: ' + raw.substring(0, 80)\n    });\n  }\n}\n\nreturn [{ json: { estimates } }];"
+        "promptType": "define",
+        "text": "=You are a senior software engineer doing sprint planning.\n\nEstimate the following GitHub issue using Fibonacci story points: 1, 2, 3, 5, 8, or 13. Consider complexity, unknowns, and scope.\n\nIssue #{{ $json.number }}: {{ $json.title }}\nLabels: {{ $json.labels.map(l => l.name).join(', ') || 'none' }}\nBody: {{ ($json.body || 'No description').substring(0, 500) }}\n\nRespond ONLY with a valid JSON object — no markdown, no extra text:\n{\"number\": {{ $json.number }}, \"title\": \"{{ $json.title.replace(/\"/g, \"'\") }}\", \"labels\": {{ JSON.stringify($json.labels.map(l => l.name)) }}, \"estimate\": 3, \"rationale\": \"one sentence\"}",
+        "options": {
+          "systemMessage": "You are a sprint estimation assistant. Output only a single valid JSON object with keys: number, title, labels, estimate (Fibonacci integer), rationale. No markdown fences, no extra text."
+        }
       },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
       "position": [
-        3696,
-        1920
+        6736,
+        1744
       ],
-      "id": "9d149a76-f166-4511-926e-4716d89d373e",
-      "name": "Aggregate Estimates"
+      "id": "9ab4e067-6a46-49f9-b967-d343548d5c4f",
+      "name": "Estimate Issue"
     },
     {
       "parameters": {
@@ -243,7 +313,7 @@
             {
               "id": "field-001",
               "name": "priorityNotes",
-              "value": "High priority: Fix navigation accessibility bug. High priority: Add dark mode support. Medium priority: Update storybook docs. Medium priority: Improve button component API. Low priority: Refactor internal CSS variables. Low priority: Add unit tests for form components.",
+              "value": "Sprint planning notes from today's meeting:\\n\\nWe agreed that the content tree work is our top priority this sprint. There are actually two separate issues about it — one is a feature suggestion with full details about CRUD operations, contextual menus, drag and drop, and lazy loading, and the other seems to be the actual implementation ticket for the same thing. Both are complex so whoever picks them up needs to sync daily to avoid doing duplicate work.\\n\\nThe logo theming refactor is also high priority because dark mode cannot move forward until we consolidate the theme files. Eve flagged this as a direct blocker for her dark mode work so we want it done early in the sprint.\\n\\nOnce the logo refactor is done, adding the new logos is a straightforward follow-on — just adding SVG assets. Medium priority, depends on the logo refactor.\\n\\nRemoving the background pattern from the side nav and nav bar is a quick cleanup with no dependencies. Medium priority, should be a fast win for whoever has spare capacity.",
               "type": "string"
             }
           ]
@@ -253,28 +323,11 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3408,
-        2616
+        6800,
+        2144
       ],
-      "id": "7add1786-2b08-4f64-abab-4189dc00858c",
+      "id": "bc4f17fc-2a53-4600-9522-59ff11e008c7",
       "name": "Priority Notes Input"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Parse the following sprint planning notes into a structured priority list.\n\nNotes:\n{{ $json.priorityNotes }}\n\nRespond ONLY with valid JSON — no markdown, no extra text:\n{\"high\": [\"topic1\"], \"medium\": [\"topic2\"], \"low\": [\"topic3\"]}",
-        "options": {
-          "systemMessage": "You are a sprint planning assistant. Output only a single valid JSON object with keys: high, medium, low — each an array of strings. No markdown fences."
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        3632,
-        2512
-      ],
-      "id": "d4bbdded-d9ca-4ddf-823f-102321f6ac7a",
-      "name": "Parse Priorities"
     },
     {
       "parameters": {
@@ -299,10 +352,10 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
       "position": [
-        3408,
-        2912
+        7088,
+        2368
       ],
-      "id": "aab807f2-afcc-4e45-8c0f-8e4e159bbea9",
+      "id": "9e1b650c-93f3-4749-8a9b-b8cd9cc9f6ff",
       "name": "Read Team Skills",
       "webhookId": "c5eed4f6-7b12-4153-ac7f-406f87411256",
       "credentials": {
@@ -314,64 +367,21 @@
     },
     {
       "parameters": {
-        "numberInputs": 3
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3,
-      "position": [
-        3984,
-        2600
-      ],
-      "id": "39860da1-673d-4302-b393-a1079e0188bf",
-      "name": "Merge All Inputs"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Combine the 3 appended items into one context object for the planner agent.\n// Items arrive in the order they were connected: estimates (input 0), priorities (input 1), teamSkills (input 2).\nconst allItems = $input.all();\n\nlet estimates = [];\nlet priorities = { high: [], medium: [], low: [] };\nlet teamSkills = { team: [] };\n\nfor (const item of allItems) {\n  // Estimates item\n  if (item.json.estimates) {\n    estimates = item.json.estimates;\n    continue;\n  }\n  // Team skills item (from Extract from File)\n  if (item.json.data && item.json.data.team) {\n    teamSkills = item.json.data;\n    continue;\n  }\n  // Priority agent output lands in item.json.output\n  const raw = item.json.output || '';\n  if (raw) {\n    try {\n      const cleaned = raw.replace(/```json?\\s*/gi, '').replace(/```/g, '').trim();\n      const parsed = JSON.parse(cleaned);\n      if (parsed.high !== undefined) {\n        priorities = parsed;\n      }\n    } catch (e) {}\n  }\n}\n\nreturn [{ json: { estimates, priorities, teamSkills } }];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        4208,
-        2616
-      ],
-      "id": "eb42a6ab-6e51-4f39-816d-43df7ec0fbfa",
-      "name": "Prepare Planner Context"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=You are an engineering manager creating a sprint plan.\n\n## Estimated Issues\n{{ JSON.stringify($json.estimates, null, 2) }}\n\n## Priority Rankings\n{{ JSON.stringify($json.priorities, null, 2) }}\n\n## Team Skills (1-5 per skill, speed 1-5, availability: full/partial/limited)\n{{ JSON.stringify($json.teamSkills, null, 2) }}\n\nCreate a sprint plan:\n- Assign each issue to the best team member (skill match + speed + availability)\n- Capacity: full=13pts, partial=8pts, limited=5pts\n- Prioritize high items first, defer what doesn't fit\n\nOutput structured Markdown with:\n## Sprint Goal\n## Assignments\n| Member | Issue # | Title | Estimate | Rationale |\n## Points Summary\n| Member | Assigned | Capacity | Status |\n## Deferred Issues\n| Issue # | Title | Estimate | Reason |\n## Sprint Notes",
-        "options": {
-          "systemMessage": "You are a sprint planning assistant. Output clean Markdown only. No JSON, no code fences around the Markdown."
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        4432,
-        2616
-      ],
-      "id": "1765e25f-67ac-4b8d-8b93-8ad1cf4f1afe",
-      "name": "Sprint Planner Agent"
-    },
-    {
-      "parameters": {
         "operation": "fromJson",
         "options": {}
       },
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        3696,
-        2912
+        7376,
+        2368
       ],
-      "id": "a11dfa7a-4a52-491e-9a54-a5d8377cb9b0",
+      "id": "b4371f81-cbdb-4e7b-8dab-80defe98756b",
       "name": "Extract from File"
     }
   ],
   "pinData": {
-    "Markdown1": [
+    "Markdown": [
       {
         "json": {
           "sprintPlan": "# Sprint Plan — 2026-03-09\n\n## Sprint Goal\n**Backlog Grooming & Planning**: Due to missing team availability and unestimated issues, the primary goal is to refine the backlog and establish team capacity for the next iteration.\n\n## Assignments\n| Member | Issue # | Title | Estimate | Rationale |\n|---|---|---|---|---|\n| *None* | *N/A* | *No assignments created* | *0* | *No team members provided.* |\n\n## Points Summary\n| Member | Assigned | Capacity | Status |\n|---|---|---|---|\n| **Total** | **0** | **0** | **0% Load** |\n\n## Deferred Issues\n| Issue # | Title | Estimate | Reason |\n|---|---|---|---|\n| 900 | Suggest a new feature Content tree enhancements | TBD | No team members available to assign; Issue lacks a valid estimate. |\n\n## Sprint Notes\n- **Missing Team Data**: No team members were defined in the input, making assignment impossible.\n- **Estimation Required**: Issue #900 resulted in a parse failure regarding its estimate. It requires refinement/poker planning before it can be included in a sprint.\n- **Prioritization**: No priority rankings were provided. Issue #900 should be categorized (High/Medium/Low) during the next grooming session.",
@@ -386,12 +396,12 @@
       "main": [
         [
           {
-            "node": "Priority Notes Input",
+            "node": "Get All Open Issues",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Get All Open Issues",
+            "node": "Priority Notes Input",
             "type": "main",
             "index": 0
           },
@@ -403,18 +413,7 @@
         ]
       ]
     },
-    "Trimble Gateway (Priority)1": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Parse Priorities",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Trimble Gateway (Planner)1": {
+    "Trimble Gateway (Planner)": {
       "ai_languageModel": [
         [
           {
@@ -425,11 +424,11 @@
         ]
       ]
     },
-    "Format Sprint Plan1": {
+    "Format Sprint Plan": {
       "main": [
         [
           {
-            "node": "Markdown1",
+            "node": "Markdown",
             "type": "main",
             "index": 0
           }
@@ -442,6 +441,17 @@
           {
             "node": "Exclude In-Progress",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trimble Gateway (Priority)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Parse Priorities",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -462,37 +472,15 @@
       "main": [
         [
           {
-            "node": "Estimate Issue",
+            "node": "Aggregate Estimates",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Aggregate Estimates",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Estimate Issue": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Issues",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Trimble Gateway (Estimator)": {
-      "ai_languageModel": [
-        [
-          {
             "node": "Estimate Issue",
-            "type": "ai_languageModel",
+            "type": "main",
             "index": 0
           }
         ]
@@ -502,14 +490,14 @@
       "main": [
         [
           {
-            "node": "Merge All Inputs",
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Priority Notes Input": {
+    "Merge": {
       "main": [
         [
           {
@@ -525,17 +513,6 @@
         [
           {
             "node": "Merge All Inputs",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Read Team Skills": {
-      "main": [
-        [
-          {
-            "node": "Extract from File",
             "type": "main",
             "index": 0
           }
@@ -568,7 +545,51 @@
       "main": [
         [
           {
-            "node": "Format Sprint Plan1",
+            "node": "Format Sprint Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trimble Gateway (Estimator)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Estimate Issue",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estimate Issue": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Priority Notes Input": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Read Team Skills": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
             "type": "main",
             "index": 0
           }
@@ -581,7 +602,7 @@
           {
             "node": "Merge All Inputs",
             "type": "main",
-            "index": 2
+            "index": 1
           }
         ]
       ]
@@ -593,7 +614,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "1c272665-35e9-4b19-a5ee-1879a06af32d",
+  "versionId": "ba501ca0-42dd-4059-a9f1-6aadd3fd5277",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "9864951ea4472b9d0ea716c66bb2527efb446aa6309ab9f74077ab1db432402b"
