@@ -5,37 +5,32 @@
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [-800, 300],
-      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "position": [-1000, 300],
+      "id": "node-001",
       "name": "Start Workflow"
     },
     {
       "parameters": {
-        "resource": "issue",
-        "operation": "getAll",
-        "owner": {
-          "__rl": true,
-          "value": "trimble-oss",
-          "mode": "list",
-          "cachedResultName": "trimble-oss",
-          "cachedResultUrl": "https://github.com/trimble-oss"
+        "method": "GET",
+        "url": "https://api.github.com/repos/trimble-oss/modus-wc-2.0/issues",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "state", "value": "open" },
+            { "name": "per_page", "value": "100" },
+            { "name": "page", "value": "1" }
+          ]
         },
-        "repository": {
-          "__rl": true,
-          "value": "modus-wc-2.0",
-          "mode": "list",
-          "cachedResultName": "modus-wc-2.0",
-          "cachedResultUrl": "https://github.com/trimble-oss/modus-wc-2.0"
-        },
-        "returnAll": true,
-        "filters": {
-          "state": "open"
+        "options": {
+          "splitIntoItems": true
         }
       },
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1.1,
-      "position": [-560, 300],
-      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-760, 300],
+      "id": "node-002",
       "name": "Get All Open Issues",
       "credentials": {
         "githubApi": {
@@ -50,11 +45,11 @@
           "options": {
             "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "loose"
           },
           "conditions": [
             {
-              "id": "filter-in-progress",
+              "id": "cond-001",
               "leftValue": "={{ $json.labels.map(l => l.name).join(',').toLowerCase() }}",
               "rightValue": "in progress",
               "operator": {
@@ -69,9 +64,9 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [-320, 300],
-      "id": "a1b2c3d4-0003-4000-8000-000000000003",
-      "name": "Exclude In-Progress Issues"
+      "position": [-520, 300],
+      "id": "node-003",
+      "name": "Exclude In-Progress"
     },
     {
       "parameters": {
@@ -79,23 +74,23 @@
       },
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [-80, 200],
-      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "position": [-280, 300],
+      "id": "node-004",
       "name": "Loop Over Issues"
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are a senior software engineer doing sprint planning.\n\nEstimate the following GitHub issue using Fibonacci story points (1, 2, 3, 5, 8, 13). Consider complexity, unknowns, and scope.\n\nIssue #{{ $json.number }}: {{ $json.title }}\n\nLabels: {{ $json.labels.map(l => l.name).join(', ') || 'none' }}\n\nBody:\n{{ $json.body || 'No description provided.' }}\n\nRespond ONLY with a valid JSON object in this exact format (no markdown, no extra text):\n{\n  \"number\": {{ $json.number }},\n  \"title\": \"{{ $json.title.replace(/\"/g, \"'\") }}\",\n  \"labels\": {{ JSON.stringify($json.labels.map(l => l.name)) }},\n  \"estimate\": <fibonacci number>,\n  \"rationale\": \"<one sentence explanation>\"\n}",
+        "text": "=You are a senior software engineer doing sprint planning.\n\nEstimate the following GitHub issue using Fibonacci story points: 1, 2, 3, 5, 8, or 13. Consider complexity, unknowns, and scope.\n\nIssue #{{ $json.number }}: {{ $json.title }}\nLabels: {{ $json.labels.map(l => l.name).join(', ') || 'none' }}\nBody: {{ ($json.body || 'No description').substring(0, 500) }}\n\nRespond ONLY with a valid JSON object — no markdown, no extra text:\n{\"number\": {{ $json.number }}, \"title\": \"{{ $json.title.replace(/\"/g, \"'\") }}\", \"labels\": {{ JSON.stringify($json.labels.map(l => l.name)) }}, \"estimate\": 3, \"rationale\": \"one sentence\"}",
         "options": {
-          "systemMessage": "You are a sprint planning assistant. You only output valid JSON. Never include markdown code blocks or extra commentary."
+          "systemMessage": "You are a sprint estimation assistant. Output only a single valid JSON object with keys: number, title, labels, estimate (Fibonacci integer), rationale. No markdown fences, no extra text."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [160, 200],
-      "id": "a1b2c3d4-0005-4000-8000-000000000005",
-      "name": "Estimate Issue (Fibonacci)"
+      "position": [-40, 300],
+      "id": "node-005",
+      "name": "Estimate Issue"
     },
     {
       "parameters": {
@@ -109,8 +104,8 @@
       },
       "type": "CUSTOM.lmChatTrimbleGateway",
       "typeVersion": 1,
-      "position": [160, 420],
-      "id": "a1b2c3d4-0006-4000-8000-000000000006",
+      "position": [-40, 500],
+      "id": "node-006",
       "name": "Trimble Gateway (Estimator)",
       "credentials": {
         "trimbleModelGatewayOAuth2Api": {
@@ -121,12 +116,12 @@
     },
     {
       "parameters": {
-        "jsCode": "// Collect all estimated issues from the loop batches\n// The loop node stores previous iteration outputs; we gather them here\nconst items = $input.all();\n\nconst estimates = [];\n\nfor (const item of items) {\n  const output = item.json.output || item.json.text || item.json.message || '';\n  \n  try {\n    // Strip markdown code fences if AI wrapped the JSON\n    const cleaned = output.replace(/```json?\\n?/g, '').replace(/```/g, '').trim();\n    const parsed = JSON.parse(cleaned);\n    estimates.push(parsed);\n  } catch (e) {\n    // If parse fails, store raw with a note\n    estimates.push({\n      number: item.json.number || null,\n      title: item.json.title || 'Unknown',\n      labels: [],\n      estimate: null,\n      rationale: 'Could not parse estimate: ' + output.substring(0, 100)\n    });\n  }\n}\n\nreturn [{ json: { estimates } }];"
+        "jsCode": "// This node receives all items from the loop's 'done' output.\n// Each item has $json.output from the AI agent (one per issue).\nconst items = $input.all();\nconst estimates = [];\n\nfor (const item of items) {\n  const raw = item.json.output || '';\n  try {\n    const cleaned = raw.replace(/```json?\\s*/gi, '').replace(/```/g, '').trim();\n    const parsed = JSON.parse(cleaned);\n    estimates.push({\n      number: parsed.number,\n      title: parsed.title,\n      labels: parsed.labels || [],\n      estimate: parsed.estimate,\n      rationale: parsed.rationale\n    });\n  } catch (e) {\n    estimates.push({\n      number: item.json.number || null,\n      title: item.json.title || 'Unknown',\n      labels: [],\n      estimate: null,\n      rationale: 'Parse failed: ' + raw.substring(0, 80)\n    });\n  }\n}\n\nreturn [{ json: { estimates } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [400, 200],
-      "id": "a1b2c3d4-0007-4000-8000-000000000007",
+      "position": [200, 160],
+      "id": "node-007",
       "name": "Aggregate Estimates"
     },
     {
@@ -134,7 +129,7 @@
         "assignments": {
           "assignments": [
             {
-              "id": "priority-text-field",
+              "id": "field-001",
               "name": "priorityNotes",
               "value": "High priority: Fix navigation accessibility bug. High priority: Add dark mode support. Medium priority: Update storybook docs. Medium priority: Improve button component API. Low priority: Refactor internal CSS variables. Low priority: Add unit tests for form components.",
               "type": "string"
@@ -145,22 +140,22 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-800, 600],
-      "id": "a1b2c3d4-0008-4000-8000-000000000008",
+      "position": [-1000, 600],
+      "id": "node-008",
       "name": "Priority Notes Input"
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are a product manager organizing sprint priorities.\n\nBelow are raw sprint planning notes. Parse them and return a structured priority list.\n\nPriority Notes:\n{{ $json.priorityNotes }}\n\nRespond ONLY with a valid JSON object in this exact format (no markdown, no extra text):\n{\n  \"high\": [\"<issue topic or keyword>\"],\n  \"medium\": [\"<issue topic or keyword>\"],\n  \"low\": [\"<issue topic or keyword>\"]\n}",
+        "text": "=Parse the following sprint planning notes into a structured priority list.\n\nNotes:\n{{ $json.priorityNotes }}\n\nRespond ONLY with valid JSON — no markdown, no extra text:\n{\"high\": [\"topic1\"], \"medium\": [\"topic2\"], \"low\": [\"topic3\"]}",
         "options": {
-          "systemMessage": "You are a sprint planning assistant that extracts priority information. You only output valid JSON. Never include markdown code blocks or extra commentary."
+          "systemMessage": "You are a sprint planning assistant. Output only a single valid JSON object with keys: high, medium, low — each an array of strings. No markdown fences."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [-560, 600],
-      "id": "a1b2c3d4-0009-4000-8000-000000000009",
+      "position": [-760, 600],
+      "id": "node-009",
       "name": "Parse Priorities"
     },
     {
@@ -175,9 +170,9 @@
       },
       "type": "CUSTOM.lmChatTrimbleGateway",
       "typeVersion": 1,
-      "position": [-560, 820],
-      "id": "a1b2c3d4-0010-4000-8000-000000000010",
-      "name": "Trimble Gateway (Priority Parser)",
+      "position": [-760, 800],
+      "id": "node-010",
+      "name": "Trimble Gateway (Priority)",
       "credentials": {
         "trimbleModelGatewayOAuth2Api": {
           "id": "6sC2H2Re3rOpqZn1",
@@ -206,8 +201,8 @@
       },
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
-      "position": [-320, 600],
-      "id": "a1b2c3d4-0011-4000-8000-000000000011",
+      "position": [-520, 600],
+      "id": "node-011",
       "name": "Read Team Skills",
       "credentials": {
         "githubApi": {
@@ -218,12 +213,12 @@
     },
     {
       "parameters": {
-        "jsCode": "// GitHub file node returns content as base64; decode it.\n// If an 'Extract from JSON' node was used upstream, data may already be parsed under $json.data.\nconst item = $input.first();\n\nlet teamSkills;\nif (item.json.data && item.json.data.team) {\n  // Already decoded by Extract from JSON node\n  teamSkills = item.json.data;\n} else if (item.json.content) {\n  // Raw GitHub API response — decode base64 manually\n  const b64 = item.json.content.replace(/\\n/g, '');\n  const decoded = atob(b64);\n  teamSkills = JSON.parse(decoded);\n} else {\n  throw new Error('Could not find team skills data. Expected $json.data.team or $json.content (base64).');\n}\n\nreturn [{ json: { teamSkills } }];"
+        "jsCode": "// GitHub file node → Extract from JSON gives $json.data.team\n// Handles both: pre-parsed (via Extract from JSON) or raw base64 from GitHub API\nconst item = $input.first();\n\nlet teamSkills;\nif (item.json.data && item.json.data.team) {\n  teamSkills = item.json.data;\n} else if (item.json.content) {\n  const decoded = atob(item.json.content.replace(/\\n/g, ''));\n  teamSkills = JSON.parse(decoded);\n} else {\n  throw new Error('Team skills data not found. Expected $json.data.team or $json.content.');\n}\n\nreturn [{ json: { teamSkills } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-80, 600],
-      "id": "a1b2c3d4-0012-4000-8000-000000000012",
+      "position": [-280, 600],
+      "id": "node-012",
       "name": "Decode Team Skills"
     },
     {
@@ -233,32 +228,32 @@
       },
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
-      "position": [640, 400],
-      "id": "a1b2c3d4-0013-4000-8000-000000000013",
+      "position": [440, 400],
+      "id": "node-013",
       "name": "Merge All Inputs"
     },
     {
       "parameters": {
-        "jsCode": "// Prepare merged context for the Sprint Planner agent\nconst allItems = $input.all();\n\n// Gather data from all merge inputs\nlet estimates = null;\nlet priorities = null;\nlet teamSkills = null;\n\nfor (const item of allItems) {\n  if (item.json.estimates) estimates = item.json.estimates;\n  if (item.json.output || item.json.text) {\n    const raw = item.json.output || item.json.text || '';\n    try {\n      const cleaned = raw.replace(/```json?\\n?/g, '').replace(/```/g, '').trim();\n      const parsed = JSON.parse(cleaned);\n      if (parsed.high || parsed.medium || parsed.low) priorities = parsed;\n    } catch (e) {}\n  }\n  if (item.json.teamSkills) teamSkills = item.json.teamSkills;\n}\n\nreturn [{\n  json: {\n    estimates: estimates || [],\n    priorities: priorities || { high: [], medium: [], low: [] },\n    teamSkills: teamSkills || { team: [] }\n  }\n}];"
+        "jsCode": "// Combine the 3 appended items into one context object for the planner agent\nconst allItems = $input.all();\n\nlet estimates = [];\nlet priorities = { high: [], medium: [], low: [] };\nlet teamSkills = { team: [] };\n\nfor (const item of allItems) {\n  if (item.json.estimates) {\n    estimates = item.json.estimates;\n  }\n  if (item.json.teamSkills) {\n    teamSkills = item.json.teamSkills;\n  }\n  // Priority agent output lands in item.json.output\n  const raw = item.json.output || '';\n  if (raw) {\n    try {\n      const cleaned = raw.replace(/```json?\\s*/gi, '').replace(/```/g, '').trim();\n      const parsed = JSON.parse(cleaned);\n      if (parsed.high !== undefined) priorities = parsed;\n    } catch (e) {}\n  }\n}\n\nreturn [{ json: { estimates, priorities, teamSkills } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [880, 400],
-      "id": "a1b2c3d4-0014-4000-8000-000000000014",
+      "position": [680, 400],
+      "id": "node-014",
       "name": "Prepare Planner Context"
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are an experienced engineering manager creating a sprint plan.\n\nYou have the following data:\n\n## Estimated Issues\n{{ JSON.stringify($json.estimates, null, 2) }}\n\n## Priority Rankings\n{{ JSON.stringify($json.priorities, null, 2) }}\n\n## Team Skills (1-5 scale per skill, speed 1-5, availability: full/partial/limited)\n{{ JSON.stringify($json.teamSkills, null, 2) }}\n\nCreate a sprint plan that:\n1. Assigns each issue to the best-suited team member based on issue labels/type and their skill scores\n2. Respects availability (full = up to 13pts, partial = up to 8pts, limited = up to 5pts)\n3. Prioritizes high-priority items first\n4. Defers issues that cannot fit in this sprint\n\nOutput a structured Markdown document with:\n- ## Sprint Goal\n- ## Assignments (table: Member | Issue # | Issue Title | Estimate | Skill Match | Rationale)\n- ## Points Summary (table: Member | Assigned Points | Capacity | Status)\n- ## Deferred Issues (table: Issue # | Title | Estimate | Reason)\n- ## Sprint Notes",
+        "text": "=You are an engineering manager creating a sprint plan.\n\n## Estimated Issues\n{{ JSON.stringify($json.estimates, null, 2) }}\n\n## Priority Rankings\n{{ JSON.stringify($json.priorities, null, 2) }}\n\n## Team Skills (1-5 per skill, speed 1-5, availability: full/partial/limited)\n{{ JSON.stringify($json.teamSkills, null, 2) }}\n\nCreate a sprint plan:\n- Assign each issue to the best team member (skill match + speed + availability)\n- Capacity: full=13pts, partial=8pts, limited=5pts\n- Prioritize high items first, defer what doesn't fit\n\nOutput structured Markdown with:\n## Sprint Goal\n## Assignments\n| Member | Issue # | Title | Estimate | Rationale |\n## Points Summary\n| Member | Assigned | Capacity | Status |\n## Deferred Issues\n| Issue # | Title | Estimate | Reason |\n## Sprint Notes",
         "options": {
-          "systemMessage": "You are a sprint planning assistant. Output clean, well-structured Markdown only. No JSON, no code blocks around the Markdown output."
+          "systemMessage": "You are a sprint planning assistant. Output clean Markdown only. No JSON, no code fences around the Markdown."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [1120, 400],
-      "id": "a1b2c3d4-0015-4000-8000-000000000015",
+      "position": [920, 400],
+      "id": "node-015",
       "name": "Sprint Planner Agent"
     },
     {
@@ -273,9 +268,9 @@
       },
       "type": "CUSTOM.lmChatTrimbleGateway",
       "typeVersion": 1,
-      "position": [1120, 620],
-      "id": "a1b2c3d4-0016-4000-8000-000000000016",
-      "name": "Trimble Gateway (Sprint Planner)",
+      "position": [920, 620],
+      "id": "node-016",
+      "name": "Trimble Gateway (Planner)",
       "credentials": {
         "trimbleModelGatewayOAuth2Api": {
           "id": "6sC2H2Re3rOpqZn1",
@@ -285,200 +280,70 @@
     },
     {
       "parameters": {
-        "jsCode": "// Format and output the final sprint plan\nconst item = $input.first();\nconst planMarkdown = item.json.output || item.json.text || item.json.message || 'No plan generated.';\n\nconst timestamp = new Date().toISOString().split('T')[0];\nconst finalPlan = `# Sprint Plan - Generated ${timestamp}\\n\\n${planMarkdown}`;\n\nconsole.log('=== SPRINT PLAN ===');\nconsole.log(finalPlan);\n\nreturn [{ json: { sprintPlan: finalPlan, generatedAt: timestamp } }];"
+        "jsCode": "const item = $input.first();\nconst planMarkdown = item.json.output || 'No plan generated.';\nconst timestamp = new Date().toISOString().split('T')[0];\nreturn [{ json: { sprintPlan: `# Sprint Plan — ${timestamp}\\n\\n${planMarkdown}`, generatedAt: timestamp } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1360, 400],
-      "id": "a1b2c3d4-0017-4000-8000-000000000017",
-      "name": "Format Sprint Plan Output"
+      "position": [1160, 400],
+      "id": "node-017",
+      "name": "Format Sprint Plan"
     }
   ],
   "pinData": {},
   "connections": {
     "Start Workflow": {
-      "main": [
-        [
-          {
-            "node": "Get All Open Issues",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Get All Open Issues", "type": "main", "index": 0 }]]
     },
     "Get All Open Issues": {
-      "main": [
-        [
-          {
-            "node": "Exclude In-Progress Issues",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Exclude In-Progress", "type": "main", "index": 0 }]]
     },
-    "Exclude In-Progress Issues": {
+    "Exclude In-Progress": {
       "main": [
-        [
-          {
-            "node": "Loop Over Issues",
-            "type": "main",
-            "index": 0
-          }
-        ],
+        [{ "node": "Loop Over Issues", "type": "main", "index": 0 }],
         []
       ]
     },
     "Loop Over Issues": {
       "main": [
-        [
-          {
-            "node": "Estimate Issue (Fibonacci)",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Aggregate Estimates",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Estimate Issue", "type": "main", "index": 0 }],
+        [{ "node": "Aggregate Estimates", "type": "main", "index": 0 }]
       ]
     },
-    "Estimate Issue (Fibonacci)": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Issues",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "Estimate Issue": {
+      "main": [[{ "node": "Loop Over Issues", "type": "main", "index": 0 }]]
     },
     "Trimble Gateway (Estimator)": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Estimate Issue (Fibonacci)",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
+      "ai_languageModel": [[{ "node": "Estimate Issue", "type": "ai_languageModel", "index": 0 }]]
     },
     "Aggregate Estimates": {
-      "main": [
-        [
-          {
-            "node": "Merge All Inputs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Merge All Inputs", "type": "main", "index": 0 }]]
     },
     "Priority Notes Input": {
-      "main": [
-        [
-          {
-            "node": "Parse Priorities",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Parse Priorities", "type": "main", "index": 0 }]]
     },
     "Parse Priorities": {
-      "main": [
-        [
-          {
-            "node": "Merge All Inputs",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
+      "main": [[{ "node": "Merge All Inputs", "type": "main", "index": 1 }]]
     },
-    "Trimble Gateway (Priority Parser)": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Parse Priorities",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
+    "Trimble Gateway (Priority)": {
+      "ai_languageModel": [[{ "node": "Parse Priorities", "type": "ai_languageModel", "index": 0 }]]
     },
     "Read Team Skills": {
-      "main": [
-        [
-          {
-            "node": "Decode Team Skills",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Decode Team Skills", "type": "main", "index": 0 }]]
     },
     "Decode Team Skills": {
-      "main": [
-        [
-          {
-            "node": "Merge All Inputs",
-            "type": "main",
-            "index": 2
-          }
-        ]
-      ]
+      "main": [[{ "node": "Merge All Inputs", "type": "main", "index": 2 }]]
     },
     "Merge All Inputs": {
-      "main": [
-        [
-          {
-            "node": "Prepare Planner Context",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Prepare Planner Context", "type": "main", "index": 0 }]]
     },
     "Prepare Planner Context": {
-      "main": [
-        [
-          {
-            "node": "Sprint Planner Agent",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Sprint Planner Agent", "type": "main", "index": 0 }]]
     },
     "Sprint Planner Agent": {
-      "main": [
-        [
-          {
-            "node": "Format Sprint Plan Output",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Format Sprint Plan", "type": "main", "index": 0 }]]
     },
-    "Trimble Gateway (Sprint Planner)": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Sprint Planner Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
+    "Trimble Gateway (Planner)": {
+      "ai_languageModel": [[{ "node": "Sprint Planner Agent", "type": "ai_languageModel", "index": 0 }]]
     }
   },
   "active": false,
@@ -487,7 +352,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "sprint-planning-v1-0001",
+  "versionId": "sprint-planning-v2-0001",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "9864951ea4472b9d0ea716c66bb2527efb446aa6309ab9f74077ab1db432402b"
