@@ -146,7 +146,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first();\nconst raw = item.json.output || item.json.text || item.json.message || '';\n\nlet issues = [];\ntry {\n  const cleaned = raw.replace(/```json?\\s*/g, '').replace(/```\\s*/g, '').trim();\n  const parsed = JSON.parse(cleaned);\n  if (Array.isArray(parsed)) {\n    issues = parsed;\n  } else if (parsed.issues && Array.isArray(parsed.issues)) {\n    issues = parsed.issues;\n  } else {\n    throw new Error('Expected an array');\n  }\n} catch (e) {\n  throw new Error(`Failed to parse AI output: ${e.message}\\n\\nRaw: ${raw.substring(0, 500)}`);\n}\n\n// Get the existing titles fetched earlier\nconst existingTitles = $('Extract Existing Titles').first().json.existingTitles || [];\n\nconst validated = issues.map((issue, i) => {\n  if (!issue.title || typeof issue.title !== 'string') {\n    throw new Error(`Issue at index ${i} is missing a valid title`);\n  }\n  let label = issue.label || issue.labels || 'chore';\n  if (Array.isArray(label)) label = label[0] || 'chore';\n  label = String(label).trim();\n\n  // Duplicate check — normalize and compare titles\n  const normalize = t => t.toLowerCase().replace(/[^a-z0-9\\s]/g, '').replace(/\\s+/g, ' ').trim();\n  const newTitle = normalize(issue.title);\n  const isDuplicate = existingTitles.some(existing => {\n    const existingNorm = normalize(existing);\n    // Exact match or one contains the other (catches minor wording differences)\n    return existingNorm === newTitle ||\n      existingNorm.includes(newTitle) ||\n      newTitle.includes(existingNorm);\n  });\n\n  return {\n    title: issue.title.trim(),\n    body: issue.body || '',\n    label,\n    assignee: issue.assignee || null,\n    isDuplicate,\n    duplicateReason: isDuplicate ? `Similar to existing: \"${existingTitles.find(e => normalize(e).includes(newTitle) || newTitle.includes(normalize(e)))}\"` : null\n  };\n});\n\nreturn validated.map(issue => ({ json: issue }));"
+        "jsCode": "const item = $input.first();\nconst raw = item.json.output || item.json.text || item.json.message || '';\n\nlet issues = [];\ntry {\n  const cleaned = raw.replace(/```json?\\s*/g, '').replace(/```\\s*/g, '').trim();\n  const parsed = JSON.parse(cleaned);\n  if (Array.isArray(parsed)) issues = parsed;\n  else if (parsed.issues && Array.isArray(parsed.issues)) issues = parsed.issues;\n  else throw new Error('Expected an array');\n} catch (e) {\n  throw new Error(`Failed to parse AI output: ${e.message}\\n\\nRaw: ${raw.substring(0, 500)}`);\n}\n\nconst validated = issues.map((issue, i) => {\n  if (!issue.title || typeof issue.title !== 'string') throw new Error(`Issue ${i} missing title`);\n  let label = issue.label || issue.labels || 'chore';\n  if (Array.isArray(label)) label = label[0] || 'chore';\n  label = String(label).trim();\n  return { title: issue.title.trim(), body: issue.body || '', label, assignee: issue.assignee || null };\n});\n\nreturn validated.map(i => ({ json: i }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -163,35 +163,6 @@
       "position": [-896, 384],
       "id": "057b2ff4-080d-4aaa-a8ba-36decc39f63b",
       "name": "Loop Over Issues"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": false,
-            "leftValue": "",
-            "typeValidation": "loose"
-          },
-          "conditions": [
-            {
-              "id": "not-duplicate-check",
-              "leftValue": "={{ $json.isDuplicate }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "notEqual"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [-672, 384],
-      "id": "if-not-duplicate-001",
-      "name": "Is Duplicate?"
     },
     {
       "parameters": {
