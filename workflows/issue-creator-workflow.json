@@ -91,9 +91,16 @@
         "url": "=https://api.github.com/repos/ElishaSamPeterPrabhu/modus-wc-2.0/issues",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]
+        },
         "sendBody": true,
-        "contentType": "json",
-        "body": "={{ JSON.stringify({ title: $json.title, body: $json.body, labels: $json.labels, assignees: $json.assignee ? [$json.assignee] : [] }) }}",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: $json.title, body: $json.body, labels: $json.labels, assignees: $json.assignee ? [$json.assignee] : [] }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
