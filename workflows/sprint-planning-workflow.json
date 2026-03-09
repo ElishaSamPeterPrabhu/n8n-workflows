@@ -121,7 +121,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Collect all estimated issues from the loop batches\n// The loop node stores previous iteration outputs; we gather them here\nconst items = $input.all();\n\nconst estimates = [];\n\nfor (const item of items) {\n  const output = item.json.output || item.json.text || item.json.message || '';\n  \n  try {\n    // Strip markdown code fences if AI wrapped the JSON\n    const cleaned = output.replace(/```json?\\n?/g, '').replace(/```/g, '').trim();\n    const parsed = JSON.parse(cleaned);\n    estimates.push(parsed);\n  } catch (e) {\n    // If parse fails, store raw with a note\n    estimates.push({\n      number: item.json.number || null,\n      title: item.json.title || 'Unknown',\n      labels: [],\n      estimate: null,\n      rationale: 'Could not parse estimate: ' + output.substring(0, 100)\n    });\n  }\n}\n\nreturn [{ json: { estimates } }];"
+        "jsCode": "// Pull all outputs produced by the Estimate Issue agent across every loop iteration\nconst agentItems = $('Estimate Issue (Fibonacci)').all();\n\nconst estimates = [];\n\nfor (const item of agentItems) {\n  const output = item.json.output || item.json.text || item.json.message || '';\n\n  try {\n    const cleaned = output.replace(/```json[\\s\\S]*?```/g, s => s.slice(s.indexOf('{'), s.lastIndexOf('}') + 1))\n                          .replace(/```/g, '')\n                          .trim();\n    // Find the JSON object inside the string in case there is surrounding text\n    const jsonStart = cleaned.indexOf('{');\n    const jsonEnd   = cleaned.lastIndexOf('}');\n    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON object found');\n    const parsed = JSON.parse(cleaned.slice(jsonStart, jsonEnd + 1));\n    estimates.push(parsed);\n  } catch (e) {\n    estimates.push({\n      number: null,\n      title: 'Unknown',\n      labels: [],\n      estimate: null,\n      rationale: 'Could not parse estimate: ' + output.substring(0, 100)\n    });\n  }\n}\n\nreturn [{ json: { estimates } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -187,18 +187,38 @@
     },
     {
       "parameters": {
-        "url": "https://raw.githubusercontent.com/ElishaSamPeterPrabhu/n8n-workflows/main/team-skills.json",
-        "options": {}
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "ElishaSamPeterPrabhu",
+          "mode": "list",
+          "cachedResultName": "ElishaSamPeterPrabhu"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list",
+          "cachedResultName": "n8n-workflows",
+          "cachedResultUrl": "https://github.com/ElishaSamPeterPrabhu/n8n-workflows"
+        },
+        "filePath": "team-skills.json"
       },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
       "position": [-320, 600],
       "id": "a1b2c3d4-0011-4000-8000-000000000011",
-      "name": "Read Team Skills"
+      "name": "Read Team Skills",
+      "credentials": {
+        "githubApi": {
+          "id": "mHISQCA9z7yFe6Cy",
+          "name": "GitHub account 70"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "// raw.githubusercontent.com returns plain JSON — parse it directly\nconst item = $input.first();\n\n// n8n httpRequest returns parsed JSON automatically when Content-Type is application/json\n// but raw.githubusercontent.com may return text/plain, so handle both\nlet teamSkills;\nif (typeof item.json === 'object' && item.json.team) {\n  teamSkills = item.json;\n} else if (item.json.body && typeof item.json.body === 'string') {\n  teamSkills = JSON.parse(item.json.body);\n} else {\n  teamSkills = item.json;\n}\n\nreturn [{ json: { teamSkills } }];"
+        "jsCode": "// The GitHub 'get file' node (v1.1) returns the decoded file content\n// directly in item.json.body as a plain string — no base64 needed.\nconst item = $input.first();\n\n// Prefer .body (v1.1 decoded), fall back to manual base64 decode of .content\nlet raw;\nif (item.json.body && typeof item.json.body === 'string') {\n  raw = item.json.body;\n} else if (item.json.content && typeof item.json.content === 'string') {\n  // atob works in n8n's sandbox; strip newlines first\n  raw = atob(item.json.content.replace(/\\n/g, ''));\n} else {\n  throw new Error('GitHub file node returned neither .body nor .content. Keys: ' + Object.keys(item.json).join(', '));\n}\n\nconst teamSkills = JSON.parse(raw);\nreturn [{ json: { teamSkills } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
