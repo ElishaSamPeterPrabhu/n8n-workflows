@@ -87,32 +87,17 @@
     },
     {
       "parameters": {
-        "resource": "issue",
-        "operation": "create",
-        "owner": {
-          "__rl": true,
-          "value": "ElishaSamPeterPrabhu",
-          "mode": "list",
-          "cachedResultName": "ElishaSamPeterPrabhu"
-        },
-        "repository": {
-          "__rl": true,
-          "value": "modus-wc-2.0",
-          "mode": "list",
-          "cachedResultName": "modus-wc-2.0",
-          "cachedResultUrl": "https://github.com/ElishaSamPeterPrabhu/modus-wc-2.0"
-        },
-        "title": "={{ $json.title }}",
-        "body": "={{ $json.body }}",
-        "labels": {
-          "labels": "={{ $json.labels.map(l => ({ label: l })) }}"
-        },
-        "assignees": {
-          "assignees": "={{ $json.assignee || '' }}"
-        }
+        "method": "POST",
+        "url": "=https://api.github.com/repos/ElishaSamPeterPrabhu/modus-wc-2.0/issues",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ title: $json.title, body: $json.body, labels: $json.labels, assignees: $json.assignee ? [$json.assignee] : [] }) }}",
+        "options": {}
       },
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1.1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [600, 200],
       "id": "b2c3d4e5-0007-4000-8000-000000000007",
       "name": "Create GitHub Issue",
