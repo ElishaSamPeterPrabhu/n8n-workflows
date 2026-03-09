@@ -1,0 +1,69 @@
+{
+  "team": [
+    {
+      "name": "Alice",
+      "skills": {
+        "frontend": 5,
+        "backend": 3,
+        "docs": 4,
+        "testing": 4,
+        "devops": 2
+      },
+      "speed": 4,
+      "availability": "full",
+      "notes": "Strong frontend specialist, comfortable writing docs and tests. Limited infra experience."
+    },
+    {
+      "name": "Bob",
+      "skills": {
+        "frontend": 3,
+        "backend": 5,
+        "docs": 2,
+        "testing": 3,
+        "devops": 4
+      },
+      "speed": 3,
+      "availability": "full",
+      "notes": "Solid backend engineer, handles devops well. Slower but thorough. Not the go-to for docs."
+    },
+    {
+      "name": "Carol",
+      "skills": {
+        "frontend": 4,
+        "backend": 4,
+        "docs": 5,
+        "testing": 5,
+        "devops": 3
+      },
+      "speed": 5,
+      "availability": "full",
+      "notes": "Versatile full-stack, fastest on the team. Excellent at testing and writing documentation."
+    },
+    {
+      "name": "Dave",
+      "skills": {
+        "frontend": 2,
+        "backend": 3,
+        "docs": 5,
+        "testing": 2,
+        "devops": 2
+      },
+      "speed": 3,
+      "availability": "partial",
+      "notes": "Primarily a technical writer. Can handle light backend tasks. Only available half-time this sprint."
+    },
+    {
+      "name": "Eve",
+      "skills": {
+        "frontend": 5,
+        "backend": 2,
+        "docs": 3,
+        "testing": 4,
+        "devops": 1
+      },
+      "speed": 4,
+      "availability": "limited",
+      "notes": "Frontend expert with strong testing skills. Very limited availability this sprint — critical tasks only."
+    }
+  ]
+}

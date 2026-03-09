@@ -1,0 +1,140 @@
+{
+  "name": "test",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        280
+      ],
+      "id": "b11b1034-baf8-4bae-b09c-7c4cb11f4480",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-3-pro-preview",
+          "mode": "list",
+          "cachedResultName": "gemini-3-pro-preview"
+        },
+        "options": {}
+      },
+      "type": "CUSTOM.lmChatTrimbleGateway",
+      "typeVersion": 1,
+      "position": [
+        304,
+        480
+      ],
+      "id": "bc99d194-5e24-492f-b7ee-665d1a43557a",
+      "name": "Trimble Model Gateway",
+      "credentials": {
+        "trimbleModelGatewayOAuth2Api": {
+          "id": "6sC2H2Re3rOpqZn1",
+          "name": "Trimble Identity account 412"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Summarize the issue, based on the issue information\n\nBody:{{ $json.body }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        280
+      ],
+      "id": "6c5f3ee7-073f-4d25-874c-e8371783b5fc",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "trimble-oss",
+          "mode": "list",
+          "cachedResultName": "trimble-oss",
+          "cachedResultUrl": "https://github.com/trimble-oss"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "modus-wc-2.0",
+          "mode": "list",
+          "cachedResultName": "modus-wc-2.0",
+          "cachedResultUrl": "https://github.com/trimble-oss/modus-wc-2.0"
+        },
+        "issueNumber": 558
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        80,
+        280
+      ],
+      "id": "5750f7f8-99e9-404d-a970-dcd4d6c933b5",
+      "name": "Get an issue",
+      "webhookId": "b2ed3257-4b6c-4307-a0cb-aeec9d4b0d37",
+      "credentials": {
+        "githubApi": {
+          "id": "mHISQCA9z7yFe6Cy",
+          "name": "GitHub account 70"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Trimble Model Gateway": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get an issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get an issue": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "24df1556-3335-414f-ae97-0c4d0fa3a6e8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9864951ea4472b9d0ea716c66bb2527efb446aa6309ab9f74077ab1db432402b"
+  },
+  "id": "RdlsTj9SxwlMvKjS",
+  "tags": []
+}
