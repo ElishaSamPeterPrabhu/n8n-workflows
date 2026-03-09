@@ -5,9 +5,12 @@
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [2736, 1008],
+      "position": [
+        2720,
+        2176
+      ],
       "id": "b11b1034-baf8-4bae-b09c-7c4cb11f4480",
-      "name": "When clicking 'Execute workflow'"
+      "name": "When clicking ‘Execute workflow’"
     },
     {
       "parameters": {
@@ -17,9 +20,12 @@
       },
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
-      "position": [5632, 992],
-      "id": "e6ce68b0-5902-42d4-aeaf-11dbb01e01a3",
-      "name": "Markdown"
+      "position": [
+        5568,
+        2028
+      ],
+      "id": "471b524f-ed02-4a24-89ba-d9eaf08d57d2",
+      "name": "Markdown1"
     },
     {
       "parameters": {
@@ -33,31 +39,12 @@
       },
       "type": "CUSTOM.lmChatTrimbleGateway",
       "typeVersion": 1,
-      "position": [3280, 1376],
-      "id": "cd5bed29-8699-49b7-a2a1-0b1a1edaf768",
-      "name": "Trimble Gateway (Priority)",
-      "credentials": {
-        "trimbleModelGatewayOAuth2Api": {
-          "id": "6sC2H2Re3rOpqZn1",
-          "name": "Trimble Identity account 412"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "gemini-3-pro-preview",
-          "mode": "list",
-          "cachedResultName": "gemini-3-pro-preview"
-        },
-        "options": {}
-      },
-      "type": "CUSTOM.lmChatTrimbleGateway",
-      "typeVersion": 1,
-      "position": [4960, 1200],
-      "id": "2febe23b-23c6-4029-a247-27925ee59ce3",
-      "name": "Trimble Gateway (Planner)",
+      "position": [
+        5064,
+        2252
+      ],
+      "id": "40a22949-953e-4caa-8509-f7845e523acc",
+      "name": "Trimble Gateway (Planner)1",
       "credentials": {
         "trimbleModelGatewayOAuth2Api": {
           "id": "6sC2H2Re3rOpqZn1",
@@ -71,65 +58,45 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [5200, 976],
-      "id": "52ba1dbf-0fc9-440b-bb98-8fafb3fa5ffc",
-      "name": "Format Sprint Plan"
-    },
-    {
-      "parameters": {
-        "url": "https://api.github.com/repos/trimble-oss/modus-wc-2.0/issues",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            { "name": "state", "value": "open" },
-            { "name": "per_page", "value": "100" },
-            { "name": "page", "value": "1" }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [3280, 880],
-      "id": "a5d56153-ee71-4fca-a9ef-6a47e817d817",
-      "name": "Get All Open Issues1",
-      "credentials": {
-        "githubApi": {
-          "id": "mHISQCA9z7yFe6Cy",
-          "name": "GitHub account 70"
-        }
-      }
+      "position": [
+        5344,
+        2028
+      ],
+      "id": "82e7c9d8-99a6-4df3-98fb-0ab1be3c76c8",
+      "name": "Format Sprint Plan1"
     },
     {
       "parameters": {
         "conditions": {
           "options": {
-            "caseSensitive": false,
+            "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "loose"
+            "typeValidation": "strict",
+            "version": 1
           },
           "conditions": [
             {
-              "id": "cond-001",
+              "id": "01c598f5-efb7-4adf-96c1-f0d39c3d0df4",
               "leftValue": "={{ $json.labels.map(l => l.name).join(',').toLowerCase() }}",
-              "rightValue": "in progress",
+              "rightValue": "untriaged",
               "operator": {
                 "type": "string",
-                "operation": "notContains"
+                "operation": "notEquals"
               }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "options": {}
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [3520, 880],
-      "id": "38df7faf-4e93-4c8f-9008-d9ce6360db11",
-      "name": "Exclude In-Progress1"
+      "position": [
+        3168,
+        1728
+      ],
+      "id": "e959ba28-c41a-4b08-a6b3-734a2434c17b",
+      "name": "Exclude In-Progress"
     },
     {
       "parameters": {
@@ -137,9 +104,12 @@
       },
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [3760, 880],
-      "id": "fbf3b3c3-4764-480e-ab50-bb8ef65fad6a",
-      "name": "Loop Over Issues1"
+      "position": [
+        3392,
+        1732
+      ],
+      "id": "b9e92442-3334-4500-a802-2fa6679569ea",
+      "name": "Loop Over Issues"
     },
     {
       "parameters": {
@@ -151,9 +121,12 @@
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [4000, 880],
-      "id": "9f2479bd-c2ff-4bec-8a65-b7569a917d39",
-      "name": "Estimate Issue1"
+      "position": [
+        3616,
+        1776
+      ],
+      "id": "8af9d8d0-fada-4249-bc04-55719aa19292",
+      "name": "Estimate Issue"
     },
     {
       "parameters": {
@@ -167,9 +140,12 @@
       },
       "type": "CUSTOM.lmChatTrimbleGateway",
       "typeVersion": 1,
-      "position": [4000, 1088],
-      "id": "872b7ef5-96fe-4ce6-9486-679e53f99c34",
-      "name": "Trimble Gateway (Estimator)1",
+      "position": [
+        3688,
+        2000
+      ],
+      "id": "a4b0659e-b262-48be-b677-dd75e5a072d9",
+      "name": "Trimble Gateway (Estimator)",
       "credentials": {
         "trimbleModelGatewayOAuth2Api": {
           "id": "6sC2H2Re3rOpqZn1",
@@ -183,9 +159,12 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [4240, 736],
-      "id": "f27231af-99fe-4ef6-979d-c2b6fb8b7f2f",
-      "name": "Aggregate Estimates1"
+      "position": [
+        3680,
+        1584
+      ],
+      "id": "9d149a76-f166-4511-926e-4716d89d373e",
+      "name": "Aggregate Estimates"
     },
     {
       "parameters": {
@@ -194,7 +173,7 @@
             {
               "id": "field-001",
               "name": "priorityNotes",
-              "value": "High priority: Fix navigation accessibility bug. High priority: Add dark mode support. Medium priority: Update storybook docs. Medium priority: Improve button component API. Low priority: Refactor internal CSS variables. Low priority: Add unit tests for form components.",
+              "value": "Sprint planning notes from today's meeting:\\n\\nWe agreed that the content tree work is our top priority this sprint. There are actually two separate issues about it — one is a feature suggestion with full details about CRUD operations, contextual menus, drag and drop, and lazy loading, and the other seems to be the actual implementation ticket for the same thing. Both are complex so whoever picks them up needs to sync daily to avoid doing duplicate work.\\n\\nThe logo theming refactor is also high priority because dark mode cannot move forward until we consolidate the theme files. Eve flagged this as a direct blocker for her dark mode work so we want it done early in the sprint.\\n\\nOnce the logo refactor is done, adding the new logos is a straightforward follow-on — just adding SVG assets. Medium priority, depends on the logo refactor.\\n\\nRemoving the background pattern from the side nav and nav bar is a quick cleanup with no dependencies. Medium priority, should be a fast win for whoever has spare capacity.",
               "type": "string"
             }
           ]
@@ -203,23 +182,12 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [3040, 1184],
-      "id": "e2b9be18-d416-46c1-9a0c-056a1f324cd1",
-      "name": "Priority Notes Input1"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=Parse the following sprint planning notes into a structured priority list.\n\nNotes:\n{{ $json.priorityNotes }}\n\nRespond ONLY with valid JSON — no markdown, no extra text:\n{\"high\": [\"topic1\"], \"medium\": [\"topic2\"], \"low\": [\"topic3\"]}",
-        "options": {
-          "systemMessage": "You are a sprint planning assistant. Output only a single valid JSON object with keys: high, medium, low — each an array of strings. No markdown fences."
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [3280, 1184],
-      "id": "3e6bd8ff-f0c0-480b-ac01-27db30944f11",
-      "name": "Parse Priorities1"
+      "position": [
+        3680,
+        2176
+      ],
+      "id": "7add1786-2b08-4f64-abab-4189dc00858c",
+      "name": "Priority Notes Input"
     },
     {
       "parameters": {
@@ -243,9 +211,12 @@
       },
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
-      "position": [3568, 1184],
-      "id": "e0c31a9a-202d-4b19-a0bd-2737e125aa71",
-      "name": "Read Team Skills1",
+      "position": [
+        3968,
+        2396
+      ],
+      "id": "aab807f2-afcc-4e45-8c0f-8e4e159bbea9",
+      "name": "Read Team Skills",
       "webhookId": "c5eed4f6-7b12-4153-ac7f-406f87411256",
       "credentials": {
         "githubApi": {
@@ -256,24 +227,29 @@
     },
     {
       "parameters": {
-        "mode": "append",
-        "options": {}
+        "numberInputs": 2
       },
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
-      "position": [4480, 976],
-      "id": "e4ed7e2b-c329-4660-b953-1216ead42097",
-      "name": "Merge All Inputs1"
+      "position": [
+        4544,
+        2012
+      ],
+      "id": "39860da1-673d-4302-b393-a1079e0188bf",
+      "name": "Merge All Inputs"
     },
     {
       "parameters": {
-        "jsCode": "// Combine the 3 appended items into one context object for the planner agent.\n// Items arrive in the order they were connected: estimates (input 0), priorities (input 1), teamSkills (input 2).\nconst allItems = $input.all();\n\nlet estimates = [];\nlet priorities = { high: [], medium: [], low: [] };\nlet teamSkills = { team: [] };\n\nfor (const item of allItems) {\n  // Estimates item\n  if (item.json.estimates) {\n    estimates = item.json.estimates;\n    continue;\n  }\n  // Team skills item (from Extract from File)\n  if (item.json.data && item.json.data.team) {\n    teamSkills = item.json.data;\n    continue;\n  }\n  // Priority agent output lands in item.json.output\n  const raw = item.json.output || '';\n  if (raw) {\n    try {\n      const cleaned = raw.replace(/```json?\\s*/gi, '').replace(/```/g, '').trim();\n      const parsed = JSON.parse(cleaned);\n      if (parsed.high !== undefined) {\n        priorities = parsed;\n      }\n    } catch (e) {}\n  }\n}\n\nreturn [{ json: { estimates, priorities, teamSkills } }];"
+        "jsCode": "const raw = $('Parse Priorities').first().json.output || '';\nlet priorities = { high: [], medium: [], low: [] };\ntry {\n  const cleaned = raw.replace(/```json?\\s*/gi, '').replace(/```/g, '').trim();\n  const parsed = JSON.parse(cleaned);\n  if (parsed.high !== undefined) priorities = parsed;\n} catch(e) {}\n\nconst estimates = $('Aggregate Estimates').first().json.estimates || [];\nconst teamSkills = $('Extract from File').first().json.data || { team: [] };\n\nreturn [{ json: { estimates, priorities, teamSkills } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [4720, 976],
-      "id": "8d6e6e80-df16-4238-8e44-c8b92477f456",
-      "name": "Prepare Planner Context1"
+      "position": [
+        4768,
+        2028
+      ],
+      "id": "eb42a6ab-6e51-4f39-816d-43df7ec0fbfa",
+      "name": "Prepare Planner Context"
     },
     {
       "parameters": {
@@ -285,9 +261,12 @@
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [4960, 976],
-      "id": "e6f8a423-d358-4e8f-8599-aa75d2e7eda3",
-      "name": "Sprint Planner Agent1"
+      "position": [
+        4992,
+        2028
+      ],
+      "id": "1765e25f-67ac-4b8d-8b93-8ad1cf4f1afe",
+      "name": "Sprint Planner Agent"
     },
     {
       "parameters": {
@@ -296,18 +275,134 @@
       },
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
-      "position": [4032, 1328],
-      "id": "a0c05a9d-d970-4915-aca5-d6aba5a85088",
-      "name": "Extract from File1"
+      "position": [
+        4256,
+        2396
+      ],
+      "id": "a11dfa7a-4a52-491e-9a54-a5d8377cb9b0",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/trimble-oss/modus-wc-2.0/issues",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "state",
+              "value": "open"
+            },
+            {
+              "name": "per_page",
+              "value": "2"
+            },
+            {
+              "name": "page",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2944,
+        1732
+      ],
+      "id": "dc6e1b6d-c92f-4c7b-8ede-dde6cf695d7e",
+      "name": "Get All Open Issues1",
+      "credentials": {
+        "githubApi": {
+          "id": "mHISQCA9z7yFe6Cy",
+          "name": "GitHub account 70"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-3-pro-preview",
+          "mode": "list",
+          "cachedResultName": "gemini-3-pro-preview"
+        },
+        "options": {}
+      },
+      "type": "CUSTOM.lmChatTrimbleGateway",
+      "typeVersion": 1,
+      "position": [
+        4264,
+        2104
+      ],
+      "id": "0af0f865-d829-4183-94f3-2037dee6f3a7",
+      "name": "Trimble Gateway (Priority)1",
+      "credentials": {
+        "trimbleModelGatewayOAuth2Api": {
+          "id": "6sC2H2Re3rOpqZn1",
+          "name": "Trimble Identity account 412"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use the priority notes from the meeting and match them with the available issues to determine their priority.\nIssues: {{ JSON.stringify($('Merge').all().map(i => ({ number: i.json.number, title: i.json.title, proposal: (i.json.body || '').match(/### Proposal\\s*\\n+([\\s\\S]*?)(?=###|$)/)?.[1]?.trim().substring(0, 400) || '', comments: i.json.comments })), null, 2) }}\n\n\nPriority Notes: {{ $('Priority Notes Input').first().json.priorityNotes }}\n",
+        "options": {
+          "systemMessage": "You are a sprint planning assistant. Output only a single valid JSON object with keys: high, medium, low — each an array of strings. No markdown fences."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        4192,
+        1880
+      ],
+      "id": "d4bbdded-d9ca-4ddf-823f-102321f6ac7a",
+      "name": "Parse Priorities"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3968,
+        1880
+      ],
+      "id": "111e4e36-ef30-494a-a5e6-5e1ba112a58c",
+      "name": "Merge"
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "Markdown1": [
+      {
+        "json": {
+          "sprintPlan": "# Sprint Plan — 2026-03-09\n\n## Sprint Goal\n**Backlog Grooming & Planning**: Due to missing team availability and unestimated issues, the primary goal is to refine the backlog and establish team capacity for the next iteration.\n\n## Assignments\n| Member | Issue # | Title | Estimate | Rationale |\n|---|---|---|---|---|\n| *None* | *N/A* | *No assignments created* | *0* | *No team members provided.* |\n\n## Points Summary\n| Member | Assigned | Capacity | Status |\n|---|---|---|---|\n| **Total** | **0** | **0** | **0% Load** |\n\n## Deferred Issues\n| Issue # | Title | Estimate | Reason |\n|---|---|---|---|\n| 900 | Suggest a new feature Content tree enhancements | TBD | No team members available to assign; Issue lacks a valid estimate. |\n\n## Sprint Notes\n- **Missing Team Data**: No team members were defined in the input, making assignment impossible.\n- **Estimation Required**: Issue #900 resulted in a parse failure regarding its estimate. It requires refinement/poker planning before it can be included in a sprint.\n- **Prioritization**: No priority rankings were provided. Issue #900 should be categorized (High/Medium/Low) during the next grooming session.",
+          "generatedAt": "2026-03-09",
+          "data": "<h1 id=\"sprintplan20260309\">Sprint Plan — 2026-03-09</h1>\n<h2 id=\"sprintgoal\">Sprint Goal</h2>\n<p><strong>Backlog Grooming & Planning</strong>: Due to missing team availability and unestimated issues, the primary goal is to refine the backlog and establish team capacity for the next iteration.</p>\n<h2 id=\"assignments\">Assignments</h2>\n<p>| Member | Issue # | Title | Estimate | Rationale |\n|---|---|---|---|---|\n| <em>None</em> | <em>N/A</em> | <em>No assignments created</em> | <em>0</em> | <em>No team members provided.</em> |</p>\n<h2 id=\"pointssummary\">Points Summary</h2>\n<p>| Member | Assigned | Capacity | Status |\n|---|---|---|---|\n| <strong>Total</strong> | <strong>0</strong> | <strong>0</strong> | <strong>0% Load</strong> |</p>\n<h2 id=\"deferredissues\">Deferred Issues</h2>\n<p>| Issue # | Title | Estimate | Reason |\n|---|---|---|---|\n| 900 | Suggest a new feature Content tree enhancements | TBD | No team members available to assign; Issue lacks a valid estimate. |</p>\n<h2 id=\"sprintnotes\">Sprint Notes</h2>\n<ul>\n<li><strong>Missing Team Data</strong>: No team members were defined in the input, making assignment impossible.</li>\n<li><strong>Estimation Required</strong>: Issue #900 resulted in a parse failure regarding its estimate. It requires refinement/poker planning before it can be included in a sprint.</li>\n<li><strong>Prioritization</strong>: No priority rankings were provided. Issue #900 should be categorized (High/Medium/Low) during the next grooming session.</li>\n</ul>"
+        }
+      }
+    ]
+  },
   "connections": {
-    "When clicking 'Execute workflow'": {
+    "When clicking ‘Execute workflow’": {
       "main": [
         [
           {
-            "node": "Priority Notes Input1",
+            "node": "Priority Notes Input",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Team Skills",
             "type": "main",
             "index": 0
           },
@@ -319,24 +414,152 @@
         ]
       ]
     },
-    "Trimble Gateway (Priority)": {
+    "Trimble Gateway (Planner)1": {
       "ai_languageModel": [
         [
           {
-            "node": "Parse Priorities1",
+            "node": "Sprint Planner Agent",
             "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     },
-    "Trimble Gateway (Planner)": {
+    "Format Sprint Plan1": {
+      "main": [
+        [
+          {
+            "node": "Markdown1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exclude In-Progress": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Issues": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Estimates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Estimate Issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estimate Issue": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trimble Gateway (Estimator)": {
       "ai_languageModel": [
         [
           {
-            "node": "Sprint Planner Agent1",
+            "node": "Estimate Issue",
             "type": "ai_languageModel",
             "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Estimates": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Priority Notes Input": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Read Team Skills": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Inputs": {
+      "main": [
+        [
+          {
+            "node": "Prepare Planner Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Planner Context": {
+      "main": [
+        [
+          {
+            "node": "Sprint Planner Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sprint Planner Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Sprint Plan1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge All Inputs",
+            "type": "main",
+            "index": 1
           }
         ]
       ]
@@ -345,157 +568,40 @@
       "main": [
         [
           {
-            "node": "Exclude In-Progress1",
+            "node": "Exclude In-Progress",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Exclude In-Progress1": {
+    "Parse Priorities": {
       "main": [
         [
           {
-            "node": "Loop Over Issues1",
+            "node": "Merge All Inputs",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Loop Over Issues1": {
-      "main": [
-        [
-          {
-            "node": "Estimate Issue1",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Aggregate Estimates1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Estimate Issue1": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Issues1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Trimble Gateway (Estimator)1": {
+    "Trimble Gateway (Priority)1": {
       "ai_languageModel": [
         [
           {
-            "node": "Estimate Issue1",
+            "node": "Parse Priorities",
             "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     },
-    "Aggregate Estimates1": {
+    "Merge": {
       "main": [
         [
           {
-            "node": "Merge All Inputs1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Priority Notes Input1": {
-      "main": [
-        [
-          {
-            "node": "Parse Priorities1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse Priorities1": {
-      "main": [
-        [
-          {
-            "node": "Merge All Inputs1",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Read Team Skills1": {
-      "main": [
-        [
-          {
-            "node": "Extract from File1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract from File1": {
-      "main": [
-        [
-          {
-            "node": "Merge All Inputs1",
-            "type": "main",
-            "index": 2
-          }
-        ]
-      ]
-    },
-    "Merge All Inputs1": {
-      "main": [
-        [
-          {
-            "node": "Prepare Planner Context1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Prepare Planner Context1": {
-      "main": [
-        [
-          {
-            "node": "Sprint Planner Agent1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Sprint Planner Agent1": {
-      "main": [
-        [
-          {
-            "node": "Format Sprint Plan",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Format Sprint Plan": {
-      "main": [
-        [
-          {
-            "node": "Markdown",
+            "node": "Parse Priorities",
             "type": "main",
             "index": 0
           }
@@ -509,7 +615,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "97432585-1b92-454a-baed-479d8a657a99",
+  "versionId": "e00121f1-ee31-4069-b24d-3018387ec094",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "9864951ea4472b9d0ea716c66bb2527efb446aa6309ab9f74077ab1db432402b"
