@@ -16,7 +16,7 @@
             {
               "id": "planning-notes-field",
               "name": "planningNotes",
-              "value": "Paste your sprint planning notes here before running the workflow.",
+              "value": "Sprint planning session notes:\n\nThe navigation keyboard accessibility fix is still on our radar — we want to make sure screen reader support is solid. The button size prop work is also something we discussed again. These are already being tracked so no need to re-open.\n\nNew items from today: The modal component needs a focus trap so keyboard users cannot tab outside it when open. The date picker component is missing ARIA labels entirely which is a WCAG violation. We also want to add a new `variant` prop to the badge component to support outlined and filled styles. The color token documentation needs a full rewrite — the current docs are missing dark mode token values. Finally, the modus-wc-react package needs peer dependency updates for React 19 compatibility.",
               "type": "string"
             }
           ]
