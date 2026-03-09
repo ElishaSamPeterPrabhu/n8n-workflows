@@ -67,7 +67,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Extract and validate the issue array from the AI agent output\nconst item = $input.first();\nconst raw = item.json.output || item.json.text || item.json.message || '';\n\nlet issues = [];\n\ntry {\n  // Strip markdown code fences if AI wrapped the JSON\n  const cleaned = raw\n    .replace(/```json?\\s*/g, '')\n    .replace(/```\\s*/g, '')\n    .trim();\n  \n  const parsed = JSON.parse(cleaned);\n  \n  if (Array.isArray(parsed)) {\n    issues = parsed;\n  } else if (parsed.issues && Array.isArray(parsed.issues)) {\n    issues = parsed.issues;\n  } else {\n    throw new Error('Unexpected JSON structure — expected an array');\n  }\n} catch (e) {\n  throw new Error(`Failed to parse AI output into issues: ${e.message}\\n\\nRaw output: ${raw.substring(0, 500)}`);\n}\n\n// Validate and normalise each issue\nconst validated = issues.map((issue, i) => {\n  if (!issue.title || typeof issue.title !== 'string') {\n    throw new Error(`Issue at index ${i} is missing a valid title`);\n  }\n  return {\n    title: issue.title.trim(),\n    body: issue.body || '',\n    labels: Array.isArray(issue.labels) ? issue.labels : [],\n    assignee: issue.assignee || null\n  };\n});\n\n// Return one item per issue so the loop processes them individually\nreturn validated.map(issue => ({ json: issue }));"
+        "jsCode": "const item = $input.first();\nconst raw = item.json.output || item.json.text || item.json.message || '';\n\nlet issues = [];\n\ntry {\n  const cleaned = raw\n    .replace(/```json?\\s*/g, '')\n    .replace(/```\\s*/g, '')\n    .trim();\n  \n  const parsed = JSON.parse(cleaned);\n  \n  if (Array.isArray(parsed)) {\n    issues = parsed;\n  } else if (parsed.issues && Array.isArray(parsed.issues)) {\n    issues = parsed.issues;\n  } else {\n    throw new Error('Unexpected JSON structure — expected an array');\n  }\n} catch (e) {\n  throw new Error(`Failed to parse AI output into issues: ${e.message}\\n\\nRaw output: ${raw.substring(0, 500)}`);\n}\n\nconst validated = issues.map((issue, i) => {\n  if (!issue.title || typeof issue.title !== 'string') {\n    throw new Error(`Issue at index ${i} is missing a valid title`);\n  }\n  // Normalise labels — handle string, comma-separated string, or array\n  let labels = issue.labels || [];\n  if (typeof labels === 'string') {\n    labels = labels.split(',').map(l => l.trim()).filter(Boolean);\n  }\n  return {\n    title: issue.title.trim(),\n    body: issue.body || '',\n    labels,\n    assignee: issue.assignee || null\n  };\n});\n\nreturn validated.map(issue => ({ json: issue }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -105,10 +105,10 @@
         "title": "={{ $json.title }}",
         "body": "={{ $json.body }}",
         "labels": {
-          "labels": "={{ $json.labels }}"
+          "labels": "={{ $json.labels.join(',') }}"
         },
         "assignees": {
-          "assignees": "={{ $json.assignee ? [$json.assignee] : [] }}"
+          "assignees": "={{ $json.assignee || '' }}"
         }
       },
       "type": "n8n-nodes-base.github",
