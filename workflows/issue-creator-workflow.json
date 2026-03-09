@@ -105,10 +105,10 @@
         "title": "={{ $json.title }}",
         "body": "={{ $json.body }}",
         "labels": {
-          "labels": "={{ $json.labels.join(',') }}"
+          "labels": "={{ $json.labels }}"
         },
         "assignees": {
-          "assignees": "={{ $json.assignee ? $json.assignee : '' }}"
+          "assignees": "={{ $json.assignee ? [$json.assignee] : [] }}"
         }
       },
       "type": "n8n-nodes-base.github",
@@ -195,14 +195,14 @@
       "main": [
         [
           {
-            "node": "Create GitHub Issue",
+            "node": "Summary",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Summary",
+            "node": "Create GitHub Issue",
             "type": "main",
             "index": 0
           }
