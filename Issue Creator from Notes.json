@@ -16,7 +16,7 @@
             {
               "id": "planning-notes-field",
               "name": "planningNotes",
-              "value": "We need to fix the accessibility issues in the navigation component — keyboard navigation is broken for screen readers. Also, the button component needs a new `size` prop (sm, md, lg) as part of the design system update. The tooltip component should auto-dismiss after 5 seconds. We should add comprehensive unit tests for the form components to improve test coverage. The storybook documentation is outdated and needs to be updated to reflect the latest API changes for input, select, and checkbox components. We also need to continue work on the content tree enhancements — specifically the CRUD operations and drag and drop functionality. The logo theme files still need to be consolidated into a single file to support dark mode properly.",
+              "value": "Paste your sprint planning notes here before running the workflow.",
               "type": "string"
             }
           ]
