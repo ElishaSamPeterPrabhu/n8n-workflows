@@ -187,38 +187,18 @@
     },
     {
       "parameters": {
-        "resource": "file",
-        "operation": "get",
-        "owner": {
-          "__rl": true,
-          "value": "ElishaSamPeterPrabhu",
-          "mode": "list",
-          "cachedResultName": "ElishaSamPeterPrabhu"
-        },
-        "repository": {
-          "__rl": true,
-          "value": "n8n-workflows",
-          "mode": "list",
-          "cachedResultName": "n8n-workflows",
-          "cachedResultUrl": "https://github.com/ElishaSamPeterPrabhu/n8n-workflows"
-        },
-        "filePath": "team-skills.json"
+        "url": "https://raw.githubusercontent.com/ElishaSamPeterPrabhu/n8n-workflows/main/team-skills.json",
+        "options": {}
       },
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1.1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [-320, 600],
       "id": "a1b2c3d4-0011-4000-8000-000000000011",
-      "name": "Read Team Skills",
-      "credentials": {
-        "githubApi": {
-          "id": "mHISQCA9z7yFe6Cy",
-          "name": "GitHub account 70"
-        }
-      }
+      "name": "Read Team Skills"
     },
     {
       "parameters": {
-        "jsCode": "// Decode team-skills.json from base64 (GitHub API returns file content as base64)\nconst item = $input.first();\nconst base64Content = item.json.content;\nconst decoded = Buffer.from(base64Content.replace(/\\n/g, ''), 'base64').toString('utf-8');\nconst teamSkills = JSON.parse(decoded);\nreturn [{ json: { teamSkills } }];"
+        "jsCode": "// raw.githubusercontent.com returns plain JSON — parse it directly\nconst item = $input.first();\n\n// n8n httpRequest returns parsed JSON automatically when Content-Type is application/json\n// but raw.githubusercontent.com may return text/plain, so handle both\nlet teamSkills;\nif (typeof item.json === 'object' && item.json.team) {\n  teamSkills = item.json;\n} else if (item.json.body && typeof item.json.body === 'string') {\n  teamSkills = JSON.parse(item.json.body);\n} else {\n  teamSkills = item.json;\n}\n\nreturn [{ json: { teamSkills } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
